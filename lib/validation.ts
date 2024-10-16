@@ -10,8 +10,7 @@ export const LoginFormValidation = z.object({
 export const RegisterFormValidation = z.object({
   name: z.string({ required_error: "Name is required" }),
   email: z.string({required_error:"Email is required"}).email({ message: "Invalid Email Address" }),
-  phone: z.string({required_error:"Phone Number is required"}).min(11, { message: "Invalid Phone Number" }),
-  address: z.string({required_error:"Address is required"}),
+  bio: z.string({required_error:"Bio is required"}),
   password: z
     .string()
     .min(6, { message: "Password Must Be 6 Characters Long" }),
