@@ -79,6 +79,7 @@ const CreateNewPost = () => {
 
     try {
       const response = await createNewPost({ token, postData: formData });
+      console.log(response);
       if (response?.error) {
         toast.error(response?.error?.data?.message);
       } else {

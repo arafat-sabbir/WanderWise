@@ -1,14 +1,63 @@
 "use client";
 import Container from "@/components/Shared/Container";
-import { useGetSinglePostQuery } from "@/redux/features/posts/postApi";
-import { Tag } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { CardFooter } from "@/components/ui/card";
+import { selectCurrentToken, selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
+import { useAppSelector } from "@/redux/features/hooks";
+import { useGetSinglePostQuery, useVotePostMutation } from "@/redux/features/posts/postApi";
+import { Loader, Tag, ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "next/image";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const PostDetail = ({ params }: { params: { id: string } }) => {
-  const { data: post, error, isLoading } = useGetSinglePostQuery(params.id);
-
+  const token = useAppSelector(selectCurrentToken);
+  const user = useAppSelector(selectCurrentUser)
+  const [comment, setComment] = useState<string>("");
+  const [votePost] = useVotePostMutation();
+  const [addComment, { isLoading }] = useCreateNewCommentMutation();
+  const { data: post, error, refetch } = useGetSinglePostQuery(params.id);
+  const handleCommentSubmit = async () => {
+    if (comment.trim()) {
+      try {
+        const response = await addComment({
+          token,
+          postId: params.id,
+          comment,
+        }).unwrap();
+        toast.success(response?.message); // Assuming response has a message field
+        refetch(); // Refetch to update the comments
+        setComment("");
+      } catch (error) {
+        toast.error(error?.data?.message || "Error submitting comment.");
+        console.error("Comment submission error:", error);
+      }
+    } else {
+      toast.error("Comment cannot be empty.");
+    }
+  };
+  const handleVote = async ({
+    postId,
+    status,
+  }: {
+    postId: string;
+    status: "upvote" | "downvote";
+  }) => {
+    try {
+      // Optimistically update the post
+      // Perform the vote mutation
+      const response = await votePost({ token, postId, status });
+      // After successful mutation, refetch posts to sync with server
+      refetch();
+      toast.success(response?.data?.message);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to vote");
+    }
+  };
   // Handle loading and error states
-  if (isLoading) return <div className="text-center py-10">Loading...</div>;
   if (error)
     return <div className="text-center py-10">Error loading post!</div>;
 
@@ -44,25 +93,63 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
           />
         ))}
       </div>
-
+        {/* Post Actions */}
+        <CardFooter className="flex justify-end items-center border-t border-gray-200 ">
+          <div className="flex space-x-4 pt-2">
+            <Button
+              variant="ghost"
+              className="flex items-center text-gray-600 hover:text-blue-500"
+              onClick={() =>
+                handleVote({ postId: params.id, status: "upvote" })
+              }
+            >
+              <ThumbsUp
+                className="mr-1"
+                color={
+                  post?.data.upvotes?.includes(user?._id as string) ? "blue" : "gray"
+                }
+                size={18}
+              />
+              {post?.data.upvotes?.length ?? 0}
+            </Button>
+            <Button
+              variant="ghost"
+              className="flex items-center text-gray-600 hover:text-red-500"
+              onClick={() =>
+                handleVote({ postId: params.id, status: "downvote" })
+              }
+            >
+              <ThumbsDown
+                className="mr-1"
+                color={
+                  post?.data.downvotes?.includes(user?._id as string) ? "red" : "gray"
+                }
+                size={18}
+              />
+              {post?.data?.downvotes?.length ?? 0}
+            </Button>
+          </div>
+        </CardFooter>
       {/* Content Section */}
       <div
         className="prose mb-6"
         dangerouslySetInnerHTML={{ __html: post?.data?.content }}
       />
-
       {/* User Info Section */}
-      <div className="flex items-center border-t pt-4 mb-6">
-        <Image
-          height={48}
-          width={48}
-          src={post?.data?.user?.profilePicture}
-          alt="User Profile"
-          className="w-12 h-12 rounded-full border border-gray-300 shadow-sm mr-4"
-        />
-        <div>
-          <h2 className="font-semibold text-lg">{post?.data.user.name}</h2>
-          <p className="text-gray-600">{post?.data.user.bio}</p>
+      <div>
+        <h1 className="border-t text-xl font-semibold py-2">Author</h1>
+        <div className="flex items-center  mb-6">
+          <Image
+            height={48}
+            width={48}
+            src={post?.data?.user?.profilePicture}
+            alt="User Profile"
+            className="w-12 h-12 rounded-full border border-gray-300 shadow-sm mr-4"
+          />
+          <div>
+            <h2 className="font-semibold text-lg">{post?.data.user.name}</h2>
+            <p className="text-gray-600">{post?.data.user.bio}</p>
+          </div>
         </div>
       </div>
 
@@ -73,23 +160,40 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
           <p className="text-gray-500">No comments yet.</p>
         ) : (
           post?.data.comments.map((comment) => (
-            <div key={comment._id} className="border-b py-2">
-              <div className="flex items-start mb-1">
-                <Image
-                  height={32}
-                  width={32}
-                  src={comment.user.profilePicture}
-                  alt="Comment User"
-                  className="w-8 h-8 rounded-full border border-gray-300 shadow-sm mr-2"
-                />
-                <div>
-                  <span className="font-semibold">{comment.user.name}</span>
-                  <p className="text-gray-700">{comment.comment}</p>
-                </div>
+            <div
+              key={comment?._id}
+              className="flex items-start mb-2 p-2 bg-gray-100 rounded-lg shadow-sm"
+            >
+              <Avatar>
+                <AvatarImage src={comment?.user?.profilePicture} />
+                <AvatarFallback>{comment?.user?.name?.[0]}</AvatarFallback>
+              </Avatar>
+
+              <div className="ml-2">
+                <p className="font-bold">
+                  {comment?.user?.name ?? "Anonymous"}
+                </p>
+                <p>{comment?.comment ?? "No comment available"}</p>
               </div>
             </div>
           ))
         )}
+        <div className="flex items-center border rounded-md shadow-sm">
+          <input
+            type="text"
+            placeholder="Write a comment..."
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            className="flex-grow p-2 border-0 rounded-md focus:outline-none"
+          />
+          <Button
+            onClick={handleCommentSubmit}
+            disabled={isLoading}
+            className="ml-2"
+          >
+            {isLoading ? <Loader size={16} /> : "Submit"}
+          </Button>
+        </div>
       </div>
     </Container>
   );

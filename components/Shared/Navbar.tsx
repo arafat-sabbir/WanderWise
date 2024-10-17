@@ -66,9 +66,9 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>
-                    <a href="/dashboard">Manage Dashboard</a>
+                    <Link href="/dashboard/profile">Manage Dashboard</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
+                  <DropdownMenuItem><Link href={"/dashboard/profile"}>Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {

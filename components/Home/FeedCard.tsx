@@ -5,7 +5,6 @@ import {
   Tag,
   Verified,
   User as LucideUser,
-  Loader,
 } from "lucide-react"; // Lucide React icons
 import { TPost } from "@/types/types";
 import Image from "next/image";
@@ -13,14 +12,9 @@ import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { MotionDiv } from "../Shared/MotionDiv";
-import { useVotePostMutation } from "@/redux/features/posts/postApi";
 import { useAppSelector } from "@/redux/features/hooks";
-import {
-  selectCurrentToken,
-  selectCurrentUser,
-} from "@/redux/features/auth/authSlice";
-import { toast } from "sonner";
-import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+
 import Link from "next/link";
 
 type FeedCardProps = {
@@ -29,76 +23,11 @@ type FeedCardProps = {
   setPosts?: any;
 };
 
-const FeedCard = ({ post, refetch, setPosts }: FeedCardProps) => {
-  const token = useAppSelector(selectCurrentToken);
+const FeedCard = ({ post }: FeedCardProps) => {
   const user = useAppSelector(selectCurrentUser);
   const [showComments, setShowComments] = useState<string | null>(null);
-  const [comment, setComment] = useState<string>("");
-  const [votePost] = useVotePostMutation();
-
   const toggleComments = (postId: string) => {
     setShowComments(showComments === postId ? null : postId);
-  };
-
-  const handleVote = async ({
-    postId,
-    status,
-  }: {
-    postId: string;
-    status: "upvote" | "downvote";
-  }) => {
-    try {
-      // Optimistically update the post
-      setPosts((prevPosts) =>
-        prevPosts.map((post) => {
-          if (post._id === postId) {
-            return {
-              ...post,
-              upvotes:
-                status === "upvote"
-                  ? [...post.upvotes, user._id]
-                  : post.upvotes.filter((id) => id !== user._id),
-              downvotes:
-                status === "downvote"
-                  ? [...post.downvotes, user._id]
-                  : post.downvotes.filter((id) => id !== user._id),
-            };
-          }
-          return post;
-        })
-      );
-
-      // Perform the vote mutation
-      const response = await votePost({ token, postId, status });
-
-      // After successful mutation, refetch posts to sync with server
-      refetch();
-      toast.success(response?.data?.message);
-    } catch (error) {
-      console.log(error);
-      toast.error("Failed to vote");
-    }
-  };
-  const [addComment, { isLoading }] = useCreateNewCommentMutation();
-
-  const handleCommentSubmit = async () => {
-    if (comment.trim()) {
-      try {
-        const response = await addComment({
-          token,
-          postId: post._id,
-          comment,
-        }).unwrap();
-        toast.success(response?.message); // Assuming response has a message field
-        refetch(); // Refetch to update the comments
-        setComment("");
-      } catch (error) {
-        toast.error(error?.data?.message || "Error submitting comment.");
-        console.error("Comment submission error:", error);
-      }
-    } else {
-      toast.error("Comment cannot be empty.");
-    }
   };
 
   return (
@@ -184,10 +113,7 @@ const FeedCard = ({ post, refetch, setPosts }: FeedCardProps) => {
           <div className="flex space-x-4 pt-2">
             <Button
               variant="ghost"
-              className="flex items-center text-gray-600 hover:text-blue-500"
-              onClick={() =>
-                handleVote({ postId: post?._id, status: "upvote" })
-              }
+              className="flex items-center cursor-no-drop text-gray-600"
             >
               <ThumbsUp
                 className="mr-1"
@@ -200,10 +126,7 @@ const FeedCard = ({ post, refetch, setPosts }: FeedCardProps) => {
             </Button>
             <Button
               variant="ghost"
-              className="flex items-center text-gray-600 hover:text-red-500"
-              onClick={() =>
-                handleVote({ postId: post?._id, status: "downvote" })
-              }
+              className="flex items-center text-gray-600 cursor-no-drop"
             >
               <ThumbsDown
                 className="mr-1"
@@ -222,48 +145,37 @@ const FeedCard = ({ post, refetch, setPosts }: FeedCardProps) => {
             >
               {post?.comments?.length ?? 0} Comments
             </p>
-            <Button variant="outline"><Link href={`/post/${post?._id}`}>View Detail</Link></Button>
+            <Button variant="outline">
+              <Link href={`/post/${post?._id}`}>View Detail</Link>
+            </Button>
           </div>
         </CardFooter>
 
         {/* Comments Section */}
         {showComments === post?._id && (
           <div className="mt-4 border-t border-gray-200 p-4">
-            {post?.comments?.map((comment) => (
-              <div key={comment?._id} className="flex items-start mb-2 p-2 bg-gray-100 rounded-lg shadow-sm">
-                <Avatar>
-                  <AvatarImage src={comment?.user?.profilePicture} />
-                  <AvatarFallback>{comment?.user?.name?.[0]}</AvatarFallback>
-                </Avatar>
-
-                <div className="ml-2">
-                  <p className="font-bold">
-                    {comment?.user?.name ?? "Anonymous"}
-                  </p>
-                  <p>{comment?.comment ?? "No comment available"}</p>
-                </div>
-              </div>
-            ))}
-
-            {/* Comment Input */}
-            <div className="mt-4">
-              <div className="flex items-center border rounded-md shadow-sm">
-                <input
-                  type="text"
-                  placeholder="Write a comment..."
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  className="flex-grow p-2 border-0 rounded-md focus:outline-none"
-                />
-                <Button
-                  onClick={handleCommentSubmit}
-                  disabled={isLoading}
-                  className="ml-2"
+            {post?.comments?.length > 0 ? (
+              post?.comments?.map((comment) => (
+                <div
+                  key={comment?._id}
+                  className="flex items-start mb-2 p-2 bg-gray-100 rounded-lg shadow-sm"
                 >
-                  {isLoading ? <Loader size={16} /> : "Submit"}
-                </Button>
-              </div>
-            </div>
+                  <Avatar>
+                    <AvatarImage src={comment?.user?.profilePicture} />
+                    <AvatarFallback>{comment?.user?.name?.[0]}</AvatarFallback>
+                  </Avatar>
+
+                  <div className="ml-2">
+                    <p className="font-bold">
+                      {comment?.user?.name ?? "Anonymous"}
+                    </p>
+                    <p>{comment?.comment ?? "No comment available"}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p>No comments available</p>
+            )}
           </div>
         )}
       </Card>
