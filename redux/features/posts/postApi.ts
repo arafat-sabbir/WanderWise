@@ -15,7 +15,6 @@ const postApi = baseApi.injectEndpoints({
     }),
 
     // get all post
-
     getAllPosts: builder.query({
       query: ({
         page = 1,
@@ -29,6 +28,27 @@ const postApi = baseApi.injectEndpoints({
         return {
           url: `/posts?page=${page}&limit=${limit}&searchTerm=${searchTerm}`,
           method: "GET",
+        };
+      },
+    }),
+    getAllPostsForUser: builder.query({
+      query: ({
+        token,
+        page = 1,
+        limit = 5,
+        searchTerm,
+      }: {
+        token: string|null;
+        page: number;
+        limit: number;
+        searchTerm?: string;
+      }) => {
+        return {
+          url: `/posts/get-post/me?page=${page}&limit=${limit}&searchTerm=${searchTerm}`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         };
       },
     }),
@@ -57,5 +77,6 @@ export const {
   useCreateNewPostMutation,
   useVotePostMutation,
   useGetAllPostsQuery,
-  useGetSinglePostQuery
+  useGetSinglePostQuery,
+  useGetAllPostsForUserQuery
 } = postApi;

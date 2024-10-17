@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
 import {
-  useGetUserQuery,
   useUpdateUserMutation,
 } from "@/redux/features/user/userApi";
 import { Loader } from "lucide-react";
+import { TUser } from "@/types/user/user";
 
 interface ProfileFormValues {
   name: string;
@@ -20,11 +20,10 @@ interface ProfileFormValues {
   bio: string;
 }
 
-const Profile = () => {
+const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetch:()=>void}) => {
   const token = useAppSelector(selectCurrentToken);
-  const { data, isLoading, refetch } = useGetUserQuery(token);
+
   const [updateUser, { isLoading: updateLoading }] = useUpdateUserMutation();
-  const user = data?.data;
   const [isEditing, setIsEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
@@ -125,7 +124,7 @@ const Profile = () => {
           <span className="text-sm text-gray-600">Followers</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold">{user?.following || 0}</span>
+          <span className="text-lg font-semibold">{user?.following?.length || 0}</span>
           <span className="text-sm text-gray-600">Following</span>
         </div>
       </div>
