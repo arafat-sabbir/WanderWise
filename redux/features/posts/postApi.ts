@@ -16,15 +16,30 @@ const postApi = baseApi.injectEndpoints({
 
     // get all post
 
-    getAllPosts:builder.query({
-      query: ({ page = 1, limit = 5, searchTerm }:{page:number,limit:number,searchTerm?:string}) => {
+    getAllPosts: builder.query({
+      query: ({
+        page = 1,
+        limit = 5,
+        searchTerm,
+      }: {
+        page: number;
+        limit: number;
+        searchTerm?: string;
+      }) => {
         return {
           url: `/posts?page=${page}&limit=${limit}&searchTerm=${searchTerm}`,
           method: "GET",
         };
       },
     }),
-
+    getSinglePost: builder.query({
+      query: (postId) => {
+        return {
+          url: `/posts/${postId}`,
+          method: "GET",
+        };
+      },
+    }),
     votePost: builder.mutation({
       query: ({ token, postId, status }) => ({
         url: `/posts/vote/${postId}`,
@@ -38,5 +53,9 @@ const postApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useCreateNewPostMutation, useVotePostMutation ,useGetAllPostsQuery} =
-  postApi;
+export const {
+  useCreateNewPostMutation,
+  useVotePostMutation,
+  useGetAllPostsQuery,
+  useGetSinglePostQuery
+} = postApi;
