@@ -1,4 +1,5 @@
 "use client";
+import Container from "@/components/Shared/Container";
 import { useGetSinglePostQuery } from "@/redux/features/posts/postApi";
 import { Tag } from "lucide-react";
 import Image from "next/image";
@@ -12,7 +13,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
     return <div className="text-center py-10">Error loading post!</div>;
 
   return (
-    <div className="max-w-4xl mx-auto p-5 md:p-10">
+    <Container className="mx-auto p-5 md:p-10">
       {post?.data?.tags && post?.data?.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 my-4">
           {post?.data.tags.map((tag, index) => (
@@ -90,7 +91,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
           ))
         )}
       </div>
-    </div>
+    </Container>
   );
 };
 

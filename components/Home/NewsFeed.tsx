@@ -60,7 +60,7 @@ const NewsFeed = () => {
         </div>
 
         {/* Loading Skeletons */}
-        {isLoading && !isFetching && (
+        {isLoading && (
           <>
             {[1, 2, 3].map((i) => (
               <div key={i} className="py-2">
