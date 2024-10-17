@@ -47,10 +47,10 @@ const FeedCard = ({ post }: { post: TPost }) => {
               )}
             </Avatar>
             <div>
-              <p className="font-bold text-lg">
+              <p className="font-bold text-lg capitalize">
                 {post?.user?.name ?? "Anonymous"}
               </p>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 capitalize">
                 {post?.category ?? "Uncategorized"}
               </p>
             </div>
@@ -60,12 +60,13 @@ const FeedCard = ({ post }: { post: TPost }) => {
 
         {/* Post Content */}
         <CardContent>
-          <h2 className="text-xl font-bold mb-2">
+          <h2 className="text-xl font-bold mb-2 capitalize">
             {post?.title ?? "Untitled Post"}
           </h2>
-          <p className="text-gray-700 mb-4">
-            {post?.content ?? "No content available."}
-          </p>
+          <div
+            className="text-gray-700 mb-4"
+            dangerouslySetInnerHTML={{ __html: post?.content ?? "No content available." }}
+          />
 
           {/* Display images if available */}
           {post?.images && post.images.length > 0 && (
@@ -89,7 +90,7 @@ const FeedCard = ({ post }: { post: TPost }) => {
               {post.tags.map((tag, index) => (
                 <span
                   key={index}
-                  className="text-sm text-blue-600 bg-blue-100 px-2 py-1 rounded-full flex items-center"
+                  className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
                 >
                   <Tag className="mr-1" size={14} /> {tag}
                 </span>
@@ -118,7 +119,11 @@ const FeedCard = ({ post }: { post: TPost }) => {
           </div>
           <p
             className="text-gray-500 hover:underline hover:cursor-pointer"
-            onClick={() => toggleComments(post?._id ?? "")}
+            onClick={() => {
+              if (post.comments.length > 0) {
+                toggleComments(post?._id ?? "");
+              }
+            }}
           >
             {post?.comments?.length ?? 0} Comments
           </p>

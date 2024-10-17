@@ -8,23 +8,38 @@ import { TPost } from "@/types/types";
 
 let page = 2;
 
-const LoadMore = () => {
+const LoadMore = ({ searchTerm }: { searchTerm: string }) => {
   const { ref, inView } = useInView();
   const [hideLoading, setHideLoading] = useState(false);
   const [posts, setPosts] = useState<TPost[]>([]);
+
   useEffect(() => {
-    const query = { page: page, limit: 3 };
-    if (inView) {
-      getAllPosts(query).then((res) => {
-        page++;
-        if (res.data.length === 0) {
-          setHideLoading(true);
-        }
-        setPosts([...posts, ...res.data]);
-      });
+    if (searchTerm) {
+      setPosts([]);
+      page = 2;
     }
-  }, [inView]);
-  console.log(posts, "posts");
+    if (inView) {
+      getAllPosts({ page: page, limit: 3, searchTerm: searchTerm }).then(
+        (res) => {
+          console.log("fetching new post", res, {
+            page: page,
+            limit: 3,
+            searchTerm: searchTerm,
+          });
+          if (searchTerm) {
+            setPosts(res.data); // Replace posts when searching
+          } else {
+            setPosts((prevPosts) => [...prevPosts, ...res.data]); // Append posts if not searching
+          }
+          if (res.data.length === 0) {
+            setHideLoading(true);
+          } else {
+            page++;
+          }
+        }
+      );
+    }
+  }, [inView, searchTerm]);
   return (
     <div className="mt-6">
       <div className="space-y-6">
@@ -32,7 +47,9 @@ const LoadMore = () => {
           <FeedCard key={post._id.toString()} post={post} />
         ))}
       </div>
-      {!hideLoading && <Loader ref={ref} className="animate-spin mx-auto my-4" />}
+      {!hideLoading && (
+        <Loader ref={ref} className="animate-spin mx-auto my-4" />
+      )}
     </div>
   );
 };
