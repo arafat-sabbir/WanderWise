@@ -65,8 +65,8 @@ const Navbar = () => {
                   <Image
                     height={32}
                     width={32}
-                    className="h-12 w-12 rounded-full cursor-pointer"
-                    src={user?.profilePicture}
+                    className="h-12 w-12 border-2 rounded-full cursor-pointer"
+                    src={user?.profilePicture as string}
                     alt="User avatar"
                   />
                 </DropdownMenuTrigger>
