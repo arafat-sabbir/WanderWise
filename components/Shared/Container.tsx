@@ -13,7 +13,7 @@ const Container = ({
   return (
     <section
       id={id}
-      className={cn("max-w-6xl 2xl:max-w-7xl mx-auto", className)}
+      className={cn("max-w-5xl 2xl:max-w-5xl mx-auto", className)}
     >
       {children}
     </section>

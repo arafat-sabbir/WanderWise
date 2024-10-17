@@ -29,6 +29,7 @@ import { useCreateNewPostMutation } from "@/redux/features/posts/postApi";
 import { toast } from "sonner";
 import { useAppSelector } from "@/redux/features/hooks";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import { Loader } from "lucide-react";
 
 // Zod validation schema
 const postSchema = z.object({
@@ -42,10 +43,9 @@ const postSchema = z.object({
 type PostFormValues = z.infer<typeof postSchema>;
 
 const CreateNewPost = () => {
-  const [tags, setTags] = useState<string[]>([]); // Change tag type to string[]
+  const [tags, setTags] = useState<string[]>([]);
   const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // Image preview state
-
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const {
     register,
     handleSubmit,
@@ -62,48 +62,62 @@ const CreateNewPost = () => {
       content: "",
     },
   });
-  const token = useAppSelector(selectCurrentToken);
 
+  const token = useAppSelector(selectCurrentToken);
+  const [modelOpen, setModelOpen] = useState(false);
   const [createNewPost, { isLoading }] = useCreateNewPostMutation();
+
   const onSubmit = async (values: PostFormValues) => {
     const formData = new FormData();
-    // Append images to formData
-    images.forEach((image) => formData.append("images", image)); // Use `image` instead of `images`
+    images.forEach((image) => formData.append("images", image));
     tags.forEach((tag) => formData.append("tags", tag));
-    // Append each key-value pair from `values` to the formData
     Object.entries(values).forEach(([key, value]) => {
       if (key !== "tags") {
-        formData.append(key, value as string); // Type casting value to string
+        formData.append(key, value as string);
       }
     });
 
     try {
       const response = await createNewPost({ token, postData: formData });
-      console.log(response?.data?.data);
       if (response?.error) {
-        // toast.error(response?.error?.data?.message);
-        // console.log(response?.error?.data);
+        toast.error(response?.error?.data?.message);
+      } else {
+        toast.success(response?.data?.message);
+        setModelOpen(false);
       }
-      //   toast.success(response?.data?.message);
     } catch (error) {
       console.log(error);
     }
   };
 
-  // React Dropzone for image uploads and preview
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
-      setImages(acceptedFiles);
-      setValue("images", acceptedFiles);
-
-      // Generate previews
+      const newImages = [...images, ...acceptedFiles];
+      setImages(newImages);
+      setValue("images", newImages);
       const previews = acceptedFiles.map((file) => URL.createObjectURL(file));
-      setImagePreviews(previews);
+      setImagePreviews((prevPreviews) => [...prevPreviews, ...previews]);
+    },
+    multiple: true,
+    accept: {
+      "image/*": [],
     },
   });
 
+  // Remove image by index
+  const removeImage = (index: number) => {
+    const newImages = [...images];
+    newImages.splice(index, 1); // Remove the image from the array
+    setImages(newImages);
+    setValue("images", newImages); // Update form state
+
+    const newPreviews = [...imagePreviews];
+    newPreviews.splice(index, 1); // Remove the preview
+    setImagePreviews(newPreviews);
+  };
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={setModelOpen} open={modelOpen}>
       <DialogTrigger>
         <Button>Create New Post</Button>
       </DialogTrigger>
@@ -158,7 +172,7 @@ const CreateNewPost = () => {
                   value={tags}
                   onChange={(newTags) => {
                     setTags(newTags);
-                    field.onChange(newTags); // Sync with form state
+                    field.onChange(newTags);
                   }}
                   name="tags"
                   placeHolder="Enter tags"
@@ -179,14 +193,22 @@ const CreateNewPost = () => {
             {imagePreviews.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {imagePreviews.map((preview, idx) => (
-                  <Image
-                    height={100}
-                    width={100}
-                    key={idx}
-                    src={preview}
-                    alt={`Preview ${idx}`}
-                    className="h-24 w-24 object-cover rounded"
-                  />
+                  <div key={idx} className="relative">
+                    <Image
+                      height={100}
+                      width={100}
+                      src={preview}
+                      alt={`Preview ${idx}`}
+                      className="h-24 w-24 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(idx)}
+                      className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1"
+                    >
+                      &times;
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
@@ -219,7 +241,6 @@ const CreateNewPost = () => {
                       "blockQuote",
                     ],
                   }}
-                  style={{ height: "300px" }} // Increase CKEditor height
                 />
               )}
             />
@@ -228,7 +249,7 @@ const CreateNewPost = () => {
             )}
           </div>
 
-          <Button type="submit">Submit</Button>
+          <Button type="submit" disabled={isLoading}>Submit{isLoading&&<Loader className="ml-2 animate-spin"/>}</Button>
         </form>
       </DialogContent>
     </Dialog>

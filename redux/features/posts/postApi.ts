@@ -4,7 +4,7 @@ const postApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Login user
     createNewPost: builder.mutation({
-      query: ({token, postData}) => ({
+      query: ({ token, postData }) => ({
         url: "/posts",
         method: "POST",
         body: postData,
@@ -13,7 +13,30 @@ const postApi = baseApi.injectEndpoints({
         },
       }),
     }),
+
+    // get all post
+
+    getAllPosts:builder.query({
+      query: ({ page = 1, limit = 5, searchTerm }:{page:number,limit:number,searchTerm?:string}) => {
+        return {
+          url: `/posts?page=${page}&limit=${limit}&searchTerm=${searchTerm}`,
+          method: "GET",
+        };
+      },
+    }),
+
+    votePost: builder.mutation({
+      query: ({ token, postId, status }) => ({
+        url: `/posts/vote/${postId}`,
+        method: "PATCH",
+        body: { status },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useCreateNewPostMutation } = postApi;
+export const { useCreateNewPostMutation, useVotePostMutation ,useGetAllPostsQuery} =
+  postApi;

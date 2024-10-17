@@ -3,9 +3,7 @@ import React, { useEffect, useState } from "react";
 import { TPost } from "@/types/types";
 import FeedCard from "./FeedCard";
 import LoadMore from "./LoadMore";
-import getAllPosts from "@/app/actions";
 import FeedCardSkeleton from "../Skeleton/FeedCardSkeleton";
-
 import {
   Select,
   SelectContent,
@@ -14,36 +12,29 @@ import {
   SelectValue,
 } from "../ui/select";
 import CreateNewPost from "../Post/CreateNewPost";
+import { useGetAllPostsQuery } from "@/redux/features/posts/postApi";
+import Container from "../Shared/Container";
 
 const NewsFeed = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [posts, setPosts] = useState<TPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [hasMorePosts, setHasMorePosts] = useState(false); // To track if more posts are available
+  const [page, setPage] = useState(1);
+  const limit = !searchTerm ? 5 : 20;
 
+  // Fetch data using the Redux query
+  const { data, isLoading, refetch, isFetching } = useGetAllPostsQuery({
+    page,
+    limit,
+    searchTerm,
+  });
+  const [posts, setPosts] = useState<TPost[]>([]);
   useEffect(() => {
-    setLoading(true);
-    if (searchTerm) {
-      setPosts([]);
-    }
-    getAllPosts({
-      page: 1,
-      limit: !searchTerm ? 3 : 20,
-      searchTerm: searchTerm,
-    }).then((res) => {
-      if (res.data.length < 3) {
-        setHasMorePosts(false);
-      } else {
-        setHasMorePosts(true);
-      }
-      setPosts(res.data);
-      setLoading(false); // Set loading to false after fetching completes
-    });
-  }, [searchTerm]);
+    setPosts(data?.data||[])
+  },[data?.data])
+  const hasMorePosts = posts.length >= limit;
 
   return (
     <div className="bg-gray-100 min-h-screen py-10">
-      <div className="max-w-4xl mx-auto">
+      <Container className="mx-auto">
         {/* Search Bar */}
         <div className="flex justify-between py-2">
           <Select>
@@ -58,31 +49,48 @@ const NewsFeed = () => {
           <input
             type="text"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setPage(1); // Reset to first page when search term changes
+            }}
             placeholder="Search posts..."
             className="border border-gray-300 rounded-md p-2 w-full max-w-lg"
           />
           <CreateNewPost />
         </div>
-        {loading &&
-          [1, 2, 3].map((i) => (
-            <div key={i} className="py-2">
-              <FeedCardSkeleton />
-            </div>
-          ))}
+
+        {/* Loading Skeletons */}
+        {isLoading && !isFetching && (
+          <>
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="py-2">
+                <FeedCardSkeleton />
+              </div>
+            ))}
+          </>
+        )}
+
         {/* News Feed */}
-        {posts?.length > 0 && (
+        {posts.length > 0 && !isLoading && (
           <div className="space-y-6">
             {posts.map((post: TPost) => (
-              <FeedCard key={post._id.toString()} post={post} />
+              <FeedCard
+                refetch={refetch}
+                key={post._id.toString()}
+                post={post}
+                setPosts={setPosts}
+              />
             ))}
           </div>
         )}
-        {/* Load More button only if there are more posts */}
-        {!loading && hasMorePosts && !searchTerm && (
-          <LoadMore searchTerm={searchTerm} />
+
+        {/* Load More button */}
+        {!isLoading && hasMorePosts && !searchTerm && (
+          <LoadMore
+            searchTerm={searchTerm}
+          />
         )}
-      </div>
+      </Container>
     </div>
   );
 };

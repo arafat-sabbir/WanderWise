@@ -11,6 +11,9 @@ body {
     text-wrap: balance;
   }
 }
+.ck-editor__editable {
+  min-height: 200px !important; /* Or whatever height you want */
+}
 
 @layer base {
   :root {
