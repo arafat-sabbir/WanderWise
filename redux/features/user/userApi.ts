@@ -7,7 +7,7 @@ const userApi = baseApi.injectEndpoints({
       query: ({ token, userData }) => ({
         url: `/users/me`,
         method: "PUT",
-        body: { ...userData },
+        body: userData,
         headers: {
           Authorization: `Bearer ${token}`, // Ensure this header is sent
         },
@@ -23,7 +23,18 @@ const userApi = baseApi.injectEndpoints({
         },
       }),
     }),
+
+    followOrUnFollowUser: builder.mutation({
+      query: ({ token, userId, status }) => ({
+        url: `/users/follow-unfollow/${userId}`,
+        method: "PUT",
+        body: { status },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useUpdateUserMutation, useGetUserQuery } = userApi;
+export const { useUpdateUserMutation, useGetUserQuery,useFollowOrUnFollowUserMutation } = userApi;

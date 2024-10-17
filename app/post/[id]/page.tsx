@@ -3,10 +3,17 @@ import Container from "@/components/Shared/Container";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
-import { selectCurrentToken, selectCurrentUser } from "@/redux/features/auth/authSlice";
+import {
+  selectCurrentToken,
+  selectCurrentUser,
+} from "@/redux/features/auth/authSlice";
 import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
 import { useAppSelector } from "@/redux/features/hooks";
-import { useGetSinglePostQuery, useVotePostMutation } from "@/redux/features/posts/postApi";
+import {
+  useGetSinglePostQuery,
+  useVotePostMutation,
+} from "@/redux/features/posts/postApi";
+import { useFollowOrUnFollowUserMutation } from "@/redux/features/user/userApi";
 import { Loader, Tag, ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -14,7 +21,7 @@ import { toast } from "sonner";
 
 const PostDetail = ({ params }: { params: { id: string } }) => {
   const token = useAppSelector(selectCurrentToken);
-  const user = useAppSelector(selectCurrentUser)
+  const user = useAppSelector(selectCurrentUser);
   const [comment, setComment] = useState<string>("");
   const [votePost] = useVotePostMutation();
   const [addComment, { isLoading }] = useCreateNewCommentMutation();
@@ -57,6 +64,23 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
       toast.error("Failed to vote");
     }
   };
+  const [foolowUser] = useFollowOrUnFollowUserMutation();
+  const followOrUnFollowUser = async (
+    userId: string,
+    status: "follow" | "unfollow"
+  ) => {
+    try {
+      // Perform the follow/unfollow mutation
+      const response = await foolowUser({ token, userId, status });
+      // After successful mutation, refetch users to sync with server
+      refetch();
+      toast.success(response?.data?.message);
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to follow/unfollow");
+    }
+  };
+
   // Handle loading and error states
   if (error)
     return <div className="text-center py-10">Error loading post!</div>;
@@ -93,43 +117,45 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
           />
         ))}
       </div>
-        {/* Post Actions */}
-        <CardFooter className="flex justify-end items-center border-t border-gray-200 ">
-          <div className="flex space-x-4 pt-2">
-            <Button
-              variant="ghost"
-              className="flex items-center text-gray-600 hover:text-blue-500"
-              onClick={() =>
-                handleVote({ postId: params.id, status: "upvote" })
+      {/* Post Actions */}
+      <CardFooter className="flex justify-end items-center border-t border-gray-200 ">
+        <div className="flex space-x-4 pt-2">
+          <Button
+            variant="ghost"
+            className="flex items-center text-gray-600 hover:text-blue-500"
+            onClick={() => handleVote({ postId: params.id, status: "upvote" })}
+          >
+            <ThumbsUp
+              className="mr-1"
+              color={
+                post?.data.upvotes?.includes(user?._id as string)
+                  ? "blue"
+                  : "gray"
               }
-            >
-              <ThumbsUp
-                className="mr-1"
-                color={
-                  post?.data.upvotes?.includes(user?._id as string) ? "blue" : "gray"
-                }
-                size={18}
-              />
-              {post?.data.upvotes?.length ?? 0}
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center text-gray-600 hover:text-red-500"
-              onClick={() =>
-                handleVote({ postId: params.id, status: "downvote" })
+              size={18}
+            />
+            {post?.data.upvotes?.length ?? 0}
+          </Button>
+          <Button
+            variant="ghost"
+            className="flex items-center text-gray-600 hover:text-red-500"
+            onClick={() =>
+              handleVote({ postId: params.id, status: "downvote" })
+            }
+          >
+            <ThumbsDown
+              className="mr-1"
+              color={
+                post?.data.downvotes?.includes(user?._id as string)
+                  ? "red"
+                  : "gray"
               }
-            >
-              <ThumbsDown
-                className="mr-1"
-                color={
-                  post?.data.downvotes?.includes(user?._id as string) ? "red" : "gray"
-                }
-                size={18}
-              />
-              {post?.data?.downvotes?.length ?? 0}
-            </Button>
-          </div>
-        </CardFooter>
+              size={18}
+            />
+            {post?.data?.downvotes?.length ?? 0}
+          </Button>
+        </div>
+      </CardFooter>
       {/* Content Section */}
       <div
         className="prose mb-6"
@@ -138,17 +164,41 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
       {/* User Info Section */}
       <div>
         <h1 className="border-t text-xl font-semibold py-2">Author</h1>
-        <div className="flex items-center  mb-6">
-          <Image
-            height={48}
-            width={48}
-            src={post?.data?.user?.profilePicture}
-            alt="User Profile"
-            className="w-12 h-12 rounded-full border border-gray-300 shadow-sm mr-4"
-          />
+        <div className="flex justify-between">
+          <div className="flex items-center  mb-6">
+            <Image
+              height={48}
+              width={48}
+              src={post?.data?.user?.profilePicture}
+              alt="User Profile"
+              className="w-12 h-12 rounded-full border border-gray-300 shadow-sm mr-4"
+            />
+            <div>
+              <h2 className="font-semibold text-lg">{post?.data.user.name}</h2>
+              <p className="text-gray-600">{post?.data.user.bio}</p>
+            </div>
+          </div>
           <div>
-            <h2 className="font-semibold text-lg">{post?.data.user.name}</h2>
-            <p className="text-gray-600">{post?.data.user.bio}</p>
+            <div>
+              {post?.data.user.followers.includes(user?._id) || (
+                <Button
+                  onClick={() =>
+                    followOrUnFollowUser(post?.data.user._id, "follow")
+                  }
+                >
+                  Follow
+                </Button>
+              )}
+              {post?.data.user.followers.includes(user?._id) && (
+                <Button
+                  onClick={() =>
+                    followOrUnFollowUser(post?.data.user._id, "unfollow")
+                  }
+                >
+                  Unfollow
+                </Button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -1,14 +1,13 @@
-"use client";
-
+"use client"
 import { Input } from "@/components/ui/input";
-import { selectCurrentToken, setUser } from "@/redux/features/auth/authSlice";
-import { useAppDispatch, useAppSelector } from "@/redux/features/hooks";
+import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import {  useAppSelector } from "@/redux/features/hooks";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useDropzone } from "react-dropzone"; // Import Dropzone
+import { useDropzone } from "react-dropzone";
 import {
   useGetUserQuery,
   useUpdateUserMutation,
@@ -23,35 +22,27 @@ interface ProfileFormValues {
 
 const Profile = () => {
   const token = useAppSelector(selectCurrentToken);
-  const dispatch = useAppDispatch();
   const { data, isLoading, refetch } = useGetUserQuery(token);
   const [updateUser, { isLoading: updateLoading }] = useUpdateUserMutation();
   const user = data?.data;
   const [isEditing, setIsEditing] = useState(false);
-  const [profilePicture, setProfilePicture] = useState<File | null>(null); // Store the uploaded file
+  const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
   // Dropzone setup
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     accept: { "image/*": [] },
     onDrop: (acceptedFiles) => {
-      setProfilePicture(acceptedFiles[0]); // Store selected file
+      setProfilePicture(acceptedFiles[0]);
     },
   });
 
-  // Initialize React Hook Form
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm<ProfileFormValues>({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormValues>({
     defaultValues: {
       name: "",
       bio: "",
     },
   });
 
-  // Reset the form values once the user data is available
   useEffect(() => {
     if (user) {
       reset({
@@ -66,8 +57,6 @@ const Profile = () => {
   };
 
   const onSubmit: SubmitHandler<ProfileFormValues> = async (values) => {
-    // If a new profile picture is uploaded, upload it to the server
-
     const userData = new FormData();
     if (profilePicture) {
       userData.append("profilePicture", profilePicture);
@@ -76,27 +65,29 @@ const Profile = () => {
     Object.entries(values).forEach(([key, value]) => {
       userData.append(key, value as string);
     });
+    
     try {
       const response = await updateUser({ token, userData });
       if (response?.error) {
         return toast.error(response?.error?.data.data?.message);
       }
       refetch();
-      console.log(response?.data?.data);
       toast.success(response?.data?.message);
       setIsEditing(false);
     } catch (error) {
       console.log("Update Error:", error);
     }
   };
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="min-h-[90vh] flex items-center justify-center">
         <Loader className="w-10 h-10 mx-auto animate-spin" />
       </div>
     );
+  }
+
   return (
-    <section className="max-w-2xl mx-auto px-14 py-6 bg-white shadow-2xl  mt-16 rounded-lg">
+    <section className="max-w-2xl mx-auto px-14 py-6 bg-white shadow-2xl mt-16 rounded-lg">
       {/* Profile Image */}
       <div className="flex flex-col items-center mb-6">
         <Image
@@ -126,6 +117,19 @@ const Profile = () => {
       </div>
 
       <h1 className="text-2xl font-bold text-center mb-6">Profile</h1>
+      
+      {/* Followers and Following Count */}
+      <div className="flex justify-center space-x-8 mb-6">
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-semibold">{user?.followers.length || 0}</span>
+          <span className="text-sm text-gray-600">Followers</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <span className="text-lg font-semibold">{user?.following || 0}</span>
+          <span className="text-sm text-gray-600">Following</span>
+        </div>
+      </div>
+
       <form className="grid gap-6" onSubmit={handleSubmit(onSubmit)}>
         {/* Name */}
         <div className="flex flex-col">
@@ -138,7 +142,6 @@ const Profile = () => {
               isEditing ? "border-blue-500" : "border-gray-300"
             } focus:outline-none focus:ring-2 focus:ring-blue-500`}
           />
-
           {errors.name && (
             <span className="text-red-500">{errors.name.message}</span>
           )}
