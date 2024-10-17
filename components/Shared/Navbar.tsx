@@ -28,9 +28,9 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex-shrink-0">
-            <a href="/" className="text-xl font-bold">
+            <Link href="/" className="text-xl font-bold">
               Logo
-            </a>
+            </Link>
           </div>
 
           {/* Navigation Links - hidden on mobile */}
@@ -66,7 +66,7 @@ const Navbar = () => {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem>
-                    <Link href="/dashboard/profile">Manage Dashboard</Link>
+                    <Link href="/dashboard">Manage Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem><Link href={"/dashboard/profile"}>Profile</Link></DropdownMenuItem>
                   <DropdownMenuItem>Settings</DropdownMenuItem>

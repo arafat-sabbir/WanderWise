@@ -53,9 +53,10 @@ const FeedCard = ({ post }: FeedCardProps) => {
               )}
             </Avatar>
             <div>
-              <p className="font-bold text-lg capitalize">
-                {post?.user?.name ?? "Anonymous"}
-              </p>
+              <h1 className="text-2xl flex justify-center items-center gap-1  font-bold text-center ">
+                {post?.user?.name}
+                {post?.user?.isVerified && <Verified color="blue" />}
+              </h1>
               <p className="text-sm text-gray-500 capitalize">
                 {post?.category ?? "Uncategorized"}
               </p>

@@ -1,18 +1,18 @@
-"use client"
+"use client";
 import { Input } from "@/components/ui/input";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
-import {  useAppSelector } from "@/redux/features/hooks";
+import { useAppSelector } from "@/redux/features/hooks";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { useDropzone } from "react-dropzone";
-import {
-  useUpdateUserMutation,
-} from "@/redux/features/user/userApi";
-import { Loader } from "lucide-react";
+import { useUpdateUserMutation } from "@/redux/features/user/userApi";
+import { Loader, Verified } from "lucide-react";
 import { TUser } from "@/types/user/user";
+import { useGetAllPostsForUserQuery } from "@/redux/features/posts/postApi";
+import { useCreateNewPaymentMutation } from "@/redux/features/payments/paymentApi";
 
 interface ProfileFormValues {
   name: string;
@@ -20,8 +20,33 @@ interface ProfileFormValues {
   bio: string;
 }
 
-const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetch:()=>void}) => {
+const Profile = ({
+  user,
+  isLoading,
+  refetch,
+}: {
+  user: TUser;
+  isLoading: boolean;
+  refetch: () => void;
+}) => {
   const token = useAppSelector(selectCurrentToken);
+  const [page, setPage] = useState(1);
+  const limit = 100;
+
+  // Fetch data using the Redux query
+  const { data } = useGetAllPostsForUserQuery({
+    token,
+    page,
+    limit,
+    searchTerm: "",
+  });
+  const isVerificationEligible = data?.data?.some(
+    (item) => item?.upvotes.length > 0
+  );
+  console.log(isVerificationEligible);
+
+  const [makePayment, { isLoading: paymentLoading }] =
+    useCreateNewPaymentMutation();
 
   const [updateUser, { isLoading: updateLoading }] = useUpdateUserMutation();
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +60,12 @@ const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetc
     },
   });
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormValues>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ProfileFormValues>({
     defaultValues: {
       name: "",
       bio: "",
@@ -64,7 +94,7 @@ const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetc
     Object.entries(values).forEach(([key, value]) => {
       userData.append(key, value as string);
     });
-    
+
     try {
       const response = await updateUser({ token, userData });
       if (response?.error) {
@@ -85,6 +115,21 @@ const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetc
     );
   }
 
+  const handlePayment = async () => {
+    try {
+      const response = await makePayment(token);
+      if (response?.error) {
+        return toast.error(response?.error?.data?.message);
+      }
+      toast.success("Please Continue Your Payment");
+      refetch();
+      if (response?.data?.data?.payment_url) {
+        window.location.href = response?.data?.data?.payment_url;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <section className="max-w-2xl mx-auto px-14 py-6 bg-white shadow-2xl mt-16 rounded-lg">
       {/* Profile Image */}
@@ -115,20 +160,34 @@ const Profile = ({user,isLoading,refetch}: {user: TUser,isLoading:boolean,refetc
         )}
       </div>
 
-      <h1 className="text-2xl font-bold text-center mb-6">Profile</h1>
-      
+      <h1 className="text-2xl flex justify-center items-center gap-1  font-bold text-center mb-6">
+        {user?.name}
+        {user?.isVerified && <Verified color="blue"/>}
+      </h1>
+
       {/* Followers and Following Count */}
       <div className="flex justify-center space-x-8 mb-6">
         <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold">{user?.followers.length || 0}</span>
+          <span className="text-lg font-semibold">
+            {user?.followers.length || 0}
+          </span>
           <span className="text-sm text-gray-600">Followers</span>
         </div>
         <div className="flex flex-col items-center">
-          <span className="text-lg font-semibold">{user?.following?.length || 0}</span>
+          <span className="text-lg font-semibold">
+            {user?.following?.length || 0}
+          </span>
           <span className="text-sm text-gray-600">Following</span>
         </div>
       </div>
-
+      {user?.isVerified || (
+        <div className="flex justify-center pb-2">
+          <Button onClick={handlePayment} disabled={paymentLoading}>
+            Verify Account
+            {paymentLoading && <Loader className="ml-2 animate-spin" />}
+          </Button>
+        </div>
+      )}
       <form className="grid gap-6" onSubmit={handleSubmit(onSubmit)}>
         {/* Name */}
         <div className="flex flex-col">
