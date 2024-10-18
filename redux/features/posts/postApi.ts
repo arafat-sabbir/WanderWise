@@ -70,6 +70,12 @@ const postApi = baseApi.injectEndpoints({
         },
       }),
     }),
+    deletePost: builder.mutation({
+      query: (postId) => ({
+        url: `/posts/${postId}`,
+        method: "DELETE",
+      }),
+    })
   }),
 });
 
@@ -78,5 +84,6 @@ export const {
   useVotePostMutation,
   useGetAllPostsQuery,
   useGetSinglePostQuery,
-  useGetAllPostsForUserQuery
+  useGetAllPostsForUserQuery,
+  useDeletePostMutation
 } = postApi;

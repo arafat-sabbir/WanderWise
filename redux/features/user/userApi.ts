@@ -34,7 +34,21 @@ const userApi = baseApi.injectEndpoints({
         },
       }),
     }),
+    getAllUser: builder.query({
+      query: (token) => ({
+        url: `/users/all`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
   }),
 });
 
-export const { useUpdateUserMutation, useGetUserQuery,useFollowOrUnFollowUserMutation } = userApi;
+export const {
+  useUpdateUserMutation,
+  useGetUserQuery,
+  useFollowOrUnFollowUserMutation,
+  useGetAllUserQuery,
+} = userApi;
