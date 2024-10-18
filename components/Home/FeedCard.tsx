@@ -13,9 +13,10 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { MotionDiv } from "../Shared/MotionDiv";
 import { useAppSelector } from "@/redux/features/hooks";
-import { selectCurrentUser } from "@/redux/features/auth/authSlice";
-
-import Link from "next/link";
+import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useGetUserQuery } from "@/redux/features/user/userApi";
 
 type FeedCardProps = {
   post: TPost;
@@ -24,12 +25,23 @@ type FeedCardProps = {
 };
 
 const FeedCard = ({ post }: FeedCardProps) => {
-  const user = useAppSelector(selectCurrentUser);
+  const token = useAppSelector(selectCurrentToken)
+  const { data} = useGetUserQuery(token);
+  const user = data?.data;
   const [showComments, setShowComments] = useState<string | null>(null);
   const toggleComments = (postId: string) => {
     setShowComments(showComments === postId ? null : postId);
   };
-
+  const router = useRouter();
+  const viewDetail = (redirect: string) => {
+    console.log(user?.isVerified);
+    if (user?.isVerified) {
+      router.push(redirect);
+    } else {
+      router.push("/dashboard")
+      toast.error("Please Verify Your Account To View Premium Content");
+    }
+  };
   return (
     <MotionDiv
       initial="hidden"
@@ -62,14 +74,21 @@ const FeedCard = ({ post }: FeedCardProps) => {
               </p>
             </div>
           </div>
-          {post?.isPremium && <Verified className="text-blue-500" size={24} />}
         </CardHeader>
 
         {/* Post Content */}
         <CardContent>
-          <h2 className="text-xl font-bold mb-2 capitalize">
-            {post?.title ?? "Untitled Post"}
-          </h2>
+          <div className="flex justify-between items-center pt-2">
+            <h2 className="text-xl font-bold mb-2 capitalize">
+              {post?.title ?? "Untitled Post"}
+            </h2>
+            {post?.isPremium && (
+              <span className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center">
+                Premium
+                <Verified className="text-blue-500 ml-1" size={24} />
+              </span>
+            )}
+          </div>
           <div
             className="text-gray-700 mb-4"
             dangerouslySetInnerHTML={{
@@ -140,8 +159,11 @@ const FeedCard = ({ post }: FeedCardProps) => {
             >
               {post?.comments?.length ?? 0} Comments
             </p>
-            <Button variant="outline">
-              <Link href={`/post/${post?._id}`}>View Detail</Link>
+            <Button
+              variant="outline"
+              onClick={()=>viewDetail(`/post/${post?._id}`)}
+            >
+              View Detail
             </Button>
           </div>
         </CardFooter>

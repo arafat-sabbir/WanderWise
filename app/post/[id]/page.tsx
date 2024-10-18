@@ -1,19 +1,20 @@
 "use client";
 import Container from "@/components/Shared/Container";
+import PostDetailSkeleton from "@/components/Skeleton/PostDetailSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
-import {
-  selectCurrentToken,
-  selectCurrentUser,
-} from "@/redux/features/auth/authSlice";
+import { selectCurrentToken, y } from "@/redux/features/auth/authSlice";
 import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
 import { useAppSelector } from "@/redux/features/hooks";
 import {
   useGetSinglePostQuery,
   useVotePostMutation,
 } from "@/redux/features/posts/postApi";
-import { useFollowOrUnFollowUserMutation } from "@/redux/features/user/userApi";
+import {
+  useFollowOrUnFollowUserMutation,
+  useGetUserQuery,
+} from "@/redux/features/user/userApi";
 import { Loader, Tag, ThumbsDown, ThumbsUp } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
@@ -21,11 +22,12 @@ import { toast } from "sonner";
 
 const PostDetail = ({ params }: { params: { id: string } }) => {
   const token = useAppSelector(selectCurrentToken);
-  const user = useAppSelector(selectCurrentUser);
+  const { data } = useGetUserQuery(token);
+  const user = data?.data;
   const [comment, setComment] = useState<string>("");
   const [votePost] = useVotePostMutation();
   const [addComment, { isLoading }] = useCreateNewCommentMutation();
-  const { data: post, error, refetch } = useGetSinglePostQuery(params.id);
+  const { data: post,isLoading:isPostLoading ,error, refetch } = useGetSinglePostQuery(params.id);
   const handleCommentSubmit = async () => {
     if (comment.trim()) {
       try {
@@ -84,7 +86,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
   // Handle loading and error states
   if (error)
     return <div className="text-center py-10">Error loading post!</div>;
-
+  if(isPostLoading) return <PostDetailSkeleton/>
   return (
     <Container className="mx-auto p-5 md:p-10">
       {post?.data?.tags && post?.data?.tags.length > 0 && (

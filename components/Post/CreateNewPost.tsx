@@ -30,6 +30,7 @@ import { toast } from "sonner";
 import { useAppSelector } from "@/redux/features/hooks";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
 import { Loader } from "lucide-react";
+import { Switch } from "../ui/switch"; // Make sure this is the correct path to your Switch component
 
 // Zod validation schema
 const postSchema = z.object({
@@ -38,6 +39,7 @@ const postSchema = z.object({
   tags: z.array(z.string()).min(1, "At least one tag is required"),
   images: z.array(z.instanceof(File)).min(1, "At least one image is required"),
   content: z.string().min(1, "Content is required"),
+  isPremium: z.boolean().default(false), // Add isPremium field
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -60,6 +62,7 @@ const CreateNewPost = () => {
       tags: [],
       images: [],
       content: "",
+      isPremium: false, // Default value for isPremium
     },
   });
 
@@ -73,21 +76,20 @@ const CreateNewPost = () => {
     tags.forEach((tag) => formData.append("tags", tag));
     Object.entries(values).forEach(([key, value]) => {
       if (key !== "tags") {
-        formData.append(key, value as string);
+        formData.append(key, value as string | Blob);
       }
     });
-
     try {
       const response = await createNewPost({ token, postData: formData });
-      console.log(response);
       if (response?.error) {
         toast.error(response?.error?.data?.message);
+        console.log(response?.error?.data);
       } else {
         toast.success(response?.data?.message);
         setModelOpen(false);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -108,12 +110,12 @@ const CreateNewPost = () => {
   // Remove image by index
   const removeImage = (index: number) => {
     const newImages = [...images];
-    newImages.splice(index, 1); // Remove the image from the array
+    newImages.splice(index, 1);
     setImages(newImages);
-    setValue("images", newImages); // Update form state
+    setValue("images", newImages);
 
     const newPreviews = [...imagePreviews];
-    newPreviews.splice(index, 1); // Remove the preview
+    newPreviews.splice(index, 1);
     setImagePreviews(newPreviews);
   };
 
@@ -130,6 +132,7 @@ const CreateNewPost = () => {
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Title */}
           <div>
             <Label htmlFor="title">Title</Label>
             <Input id="title" {...register("title")} />
@@ -138,6 +141,7 @@ const CreateNewPost = () => {
             )}
           </div>
 
+          {/* Category */}
           <div>
             <Label htmlFor="category">Category</Label>
             <Controller
@@ -163,6 +167,7 @@ const CreateNewPost = () => {
             )}
           </div>
 
+          {/* Tags */}
           <div>
             <Label htmlFor="tags">Tags</Label>
             <Controller
@@ -185,6 +190,7 @@ const CreateNewPost = () => {
             )}
           </div>
 
+          {/* Images */}
           <div>
             <Label htmlFor="images">Images</Label>
             <div {...getRootProps({ className: "border border-dashed p-4" })}>
@@ -218,6 +224,7 @@ const CreateNewPost = () => {
             )}
           </div>
 
+          {/* Content */}
           <div>
             <Label htmlFor="content">Content</Label>
             <Controller
@@ -250,7 +257,30 @@ const CreateNewPost = () => {
             )}
           </div>
 
-          <Button type="submit" disabled={isLoading}>Submit{isLoading&&<Loader className="ml-2 animate-spin"/>}</Button>
+          {/* isPremium Toggle */}
+          <div>
+            <Label htmlFor="Premium">Premium</Label>
+            <Controller
+              control={control}
+              name="isPremium"
+              render={({ field }) => (
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="Premium"
+                    checked={field.value} // This should remain boolean
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked); // Use the checked boolean directly
+                    }}
+                  />
+                  <span>{field.value ? "Yes" : "No"}</span>
+                </div>
+              )}
+            />
+          </div>
+
+          <Button type="submit" disabled={isLoading}>
+            Submit{isLoading && <Loader className="ml-2 animate-spin" />}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
