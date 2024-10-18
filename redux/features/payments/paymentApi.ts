@@ -12,7 +12,19 @@ const paymentApi = baseApi.injectEndpoints({
         },
       }),
     }),
+    getAllPayment: builder.query({
+      query: (token: string) => {
+        return {
+          url: `/payments/all`,
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        };
+      },
+    }),
   }),
 });
 
-export const { useCreateNewPaymentMutation } = paymentApi;
+export const { useCreateNewPaymentMutation, useGetAllPaymentQuery } =
+  paymentApi;

@@ -24,10 +24,11 @@ import { TUser } from "@/types/user/user";
 import { useGetAllUserQuery } from "@/redux/features/user/userApi";
 import { useAppSelector } from "@/redux/features/hooks";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import TableSkeleton from "@/components/Skeleton/TableSkeleton";
 
 const ManageUsers: React.FC = () => {
   const token = useAppSelector(selectCurrentToken);
-  const { data } = useGetAllUserQuery(token);
+  const { data,isLoading } = useGetAllUserQuery(token);
   const users = data?.data;
   const [editLoading, setEditLoading] = useState(false); // State for edit loading
   const [editModalOpen, setEditModalOpen] = useState(false); // State for edit modal
@@ -125,7 +126,9 @@ const ManageUsers: React.FC = () => {
   const handleEditStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setEditStatus(e.target.value);
   };
-
+  if(isLoading){
+    return <TableSkeleton/>
+  }
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">

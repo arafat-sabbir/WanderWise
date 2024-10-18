@@ -1,4 +1,5 @@
 "use client";
+import ManagePayment from "@/components/Dashboard/admin/ManagePayment";
 import ManagePosts from "@/components/Dashboard/admin/ManagePosts";
 import ManageUsers from "@/components/Dashboard/admin/ManageUser";
 import FollowersFollowing from "@/components/Dashboard/user/followersfollowing/FollowersFollowing";
@@ -17,55 +18,101 @@ const Page = () => {
   const token = useAppSelector(selectCurrentToken);
   const user = useAppSelector(selectCurrentUser);
   const { data, refetch, isLoading } = useGetUserQuery(token);
+
   return (
-    <Container>
-      <Tabs defaultValue={user?.role === "admin" ? "ManageUser" : "Profile"}>
-        {/* user Dashboard */}
-        {user?.role === "user" && (
-          <TabsList>
-            <TabsTrigger value="Profile">Profile</TabsTrigger>
-            <TabsTrigger value="Posts">Your Posts</TabsTrigger>
-            <TabsTrigger value="FollwersFollowing">
-              Follwers & Following
-            </TabsTrigger>
-          </TabsList>
-        )}
-        
-        {/* Admin Dashboard */}
+    <Container className="py-10 px-6 lg:px-8">
+      <h1 className="text-2xl lg:text-3xl font-bold text-center mb-8">
+        {user?.role === "admin" ? "Admin Dashboard" : "User Dashboard"}
+      </h1>
+      <Tabs
+        defaultValue={user?.role === "admin" ? "ManageUser" : "Profile"}
+        className="space-y-6"
+      >
+        {/* Admin Tabs */}
         {user?.role === "admin" && (
-          <TabsList>
-            <TabsTrigger value="ManageUser">Manage User</TabsTrigger>
-            <TabsTrigger value="ManagePosts">Manage Posts</TabsTrigger>
-            <TabsTrigger value="FollwersFollowing">
-              Follwers & Following
+          <TabsList className="flex flex-wrap gap-4 bg-white justify-center lg:justify-start ">
+            <TabsTrigger
+              value="ManageUser"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Manage User
+            </TabsTrigger>
+            <TabsTrigger
+              value="ManagePosts"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Manage Posts
+            </TabsTrigger>
+            <TabsTrigger
+              value="ManagePayment"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Manage Payment
             </TabsTrigger>
           </TabsList>
         )}
 
-        {/* Admin Dashboard */}
+        {/* User Tabs */}
+        {user?.role === "user" && (
+          <TabsList className="flex flex-wrap gap-4 bg-white  justify-center lg:justify-start ">
+            <TabsTrigger
+              value="Profile"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Profile
+            </TabsTrigger>
+            <TabsTrigger
+              value="Posts"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Your Posts
+            </TabsTrigger>
+            <TabsTrigger
+              value="FollwersFollowing"
+              className="px-4 py-2 text-lg font-semibold text-gray-700 hover:text-primary rounded-lg transition"
+            >
+              Followers & Following
+            </TabsTrigger>
+          </TabsList>
+        )}
+
+        {/* Admin Dashboard Content */}
         <TabsContent value="ManageUser">
-          <ManageUsers />
+          <div className="p-6 bg-white shadow-xl rounded-lg">
+            <ManageUsers />
+          </div>
         </TabsContent>
         <TabsContent value="ManagePosts">
-          <ManagePosts />
+          <div className="p-6 bg-white shadow-xl rounded-lg">
+            <ManagePosts />
+          </div>
         </TabsContent>
-        {/* Admin Dashboard */}
+        <TabsContent value="ManagePayment">
+          <div className="p-6 bg-white shadow-xl rounded-lg">
+            <ManagePayment />
+          </div>
+        </TabsContent>
 
-        {/* user Dashboard */}
+        {/* User Dashboard Content */}
         <TabsContent value="Profile">
-          <Profile user={data?.data} isLoading={isLoading} refetch={refetch} />
+          <div className="p-6 bg-white  rounded-lg">
+            <Profile user={data?.data} isLoading={isLoading} refetch={refetch} />
+          </div>
         </TabsContent>
         <TabsContent value="Posts">
-          <Posts />
+          <div className="p-6 bg-white  rounded-lg">
+            <Posts />
+          </div>
         </TabsContent>
         <TabsContent value="FollwersFollowing">
-          <FollowersFollowing
-            refetch={refetch}
-            followers={data?.data?.followers}
-            following={data?.data?.following}
-          />
+          <div className="p-6 bg-white  rounded-lg">
+            <FollowersFollowing
+              refetch={refetch}
+              followers={data?.data?.followers}
+              following={data?.data?.following}
+            />
+          </div>
         </TabsContent>
-        {/* User Dashboard */}
       </Tabs>
     </Container>
   );

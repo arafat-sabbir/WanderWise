@@ -138,7 +138,7 @@ const FollowersFollowing = ({
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6">
       {/* Container */}
       <div className="container mx-auto">
         {/* Heading */}
@@ -151,7 +151,7 @@ const FollowersFollowing = ({
           {/* Followers */}
           <div>
             <h2 className="text-2xl font-semibold mb-4">
-              Followers {followers.length || 0}
+              Followers {followers?.length || 0}
             </h2>
             <table className="min-w-full bg-white rounded-lg shadow-lg">
               <thead>
@@ -172,7 +172,7 @@ const FollowersFollowing = ({
                 ))}
               </thead>
               <tbody>
-                {followersTable.getRowModel().rows.map((row) => (
+                {followersTable?.getRowModel().rows.map((row) => (
                   <tr key={row.id} className="hover:bg-gray-100">
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="p-3 border-b">

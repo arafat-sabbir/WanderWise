@@ -112,10 +112,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
         {/* Post Actions */}
         <CardFooter className="flex justify-between items-center border-t border-gray-200 ">
           <div className="flex space-x-4 pt-2">
-            <Button
-              variant="ghost"
-              className="flex items-center cursor-no-drop text-gray-600"
-            >
+            <div className="flex items-center">
               <ThumbsUp
                 className="mr-1"
                 color={
@@ -124,11 +121,8 @@ const FeedCard = ({ post }: FeedCardProps) => {
                 size={18}
               />
               {post?.upvotes?.length ?? 0}
-            </Button>
-            <Button
-              variant="ghost"
-              className="flex items-center text-gray-600 cursor-no-drop"
-            >
+            </div>
+            <div className="flex items-center">
               <ThumbsDown
                 className="mr-1"
                 color={
@@ -137,7 +131,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
                 size={18}
               />
               {post?.downvotes?.length ?? 0}
-            </Button>
+            </div>
           </div>
           <div className="flex items-center">
             <p

@@ -25,7 +25,7 @@ const Posts = () => {
   }, [data?.data]);
 
   return (
-    <div className="bg-gray-100 min-h-screen py-10">
+    <div className=" min-h-screen py-10">
       <Container className="mx-auto">
         {/* Search Bar */}
         <div className="flex justify-between py-2">
