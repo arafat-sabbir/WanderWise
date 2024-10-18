@@ -1,7 +1,7 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import {useDropzone} from 'react-dropzone'
+import { useDropzone } from "react-dropzone";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Form } from "@/components/ui/form";
@@ -34,7 +34,6 @@ const RegisterForm = ({ className }: { className?: string }) => {
       email: "",
       password: "",
       name: "",
-      phone: "",
       bio: "",
     },
   });
@@ -46,17 +45,17 @@ const RegisterForm = ({ className }: { className?: string }) => {
 
   const onSubmit = async (values: z.infer<typeof RegisterFormValidation>) => {
     const formData = new FormData();
-  
+
     // Append profile picture separately
-    formData.append('profilePicture', photo as File);
-  
+    formData.append("profilePicture", photo as File);
+
     // Append each key-value pair from `values` to the formData
     Object.entries(values).forEach(([key, value]) => {
       formData.append(key, value as string); // Type casting value to string
     });
-  
+
     console.log({ profilePicture: photo, ...values });
-  
+
     try {
       const response = await registerUser(formData); // Send `formData` instead of object
       console.log(response?.data?.data);
@@ -67,9 +66,8 @@ const RegisterForm = ({ className }: { className?: string }) => {
       toast.error(error.response.data.message);
     }
   };
-  
-  //Drop Zone For Photo Upload For Future Work
 
+  //Drop Zone For Photo Upload For Future Work
 
   const onDrop = (acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
@@ -148,8 +146,8 @@ const RegisterForm = ({ className }: { className?: string }) => {
                 {photo && (
                   <div className="flex justify-center">
                     <Image
-                    height={32}
-                    width={32}
+                      height={32}
+                      width={32}
                       src={photoPreview!}
                       alt="Preview"
                       className="h-32 w-32 object-cover rounded mt-2"

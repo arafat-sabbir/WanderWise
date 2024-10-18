@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -33,7 +32,7 @@ const LoginForm = ({ className }: { className?: string }) => {
       password: "",
     },
   });
-  const [loginUser, { data, isLoading, isError }] = useLoginMutation();
+  const [loginUser, { isLoading }] = useLoginMutation();
   const onSubmit = async (values: z.infer<typeof LoginFormValidation>) => {
     try {
       const response = await loginUser(values);

@@ -4,7 +4,7 @@ import PostDetailSkeleton from "@/components/Skeleton/PostDetailSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
-import { selectCurrentToken, y } from "@/redux/features/auth/authSlice";
+import { selectCurrentToken } from "@/redux/features/auth/authSlice";
 import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
 import { useAppSelector } from "@/redux/features/hooks";
 import {
@@ -39,7 +39,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
         toast.success(response?.message); // Assuming response has a message field
         refetch(); // Refetch to update the comments
         setComment("");
-      } catch (error) {
+      } catch (error:any) {
         toast.error(error?.data?.message || "Error submitting comment.");
         console.error("Comment submission error:", error);
       }
@@ -91,7 +91,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
     <Container className="mx-auto p-5 md:p-10">
       {post?.data?.tags && post?.data?.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 my-4">
-          {post?.data.tags.map((tag, index) => (
+          {post?.data.tags.map((tag: string, index:number) => (
             <span
               key={index}
               className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
@@ -211,7 +211,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
         {post?.data.comments.length === 0 ? (
           <p className="text-gray-500">No comments yet.</p>
         ) : (
-          post?.data.comments.map((comment) => (
+          post?.data.comments.map((comment:any) => (
             <div
               key={comment?._id}
               className="flex items-start mb-2 p-2 bg-gray-100 rounded-lg shadow-sm"

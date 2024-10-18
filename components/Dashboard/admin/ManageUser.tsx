@@ -1,5 +1,5 @@
 "use client";
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React, { useState, useMemo, useEffect } from "react";
 import {
   useReactTable,
@@ -28,7 +28,7 @@ import TableSkeleton from "@/components/Skeleton/TableSkeleton";
 
 const ManageUsers: React.FC = () => {
   const token = useAppSelector(selectCurrentToken);
-  const { data,isLoading } = useGetAllUserQuery(token);
+  const { data, isLoading } = useGetAllUserQuery(token);
   const users = data?.data;
   const [editLoading, setEditLoading] = useState(false); // State for edit loading
   const [editModalOpen, setEditModalOpen] = useState(false); // State for edit modal
@@ -37,7 +37,7 @@ const ManageUsers: React.FC = () => {
   const [editStatus, setEditStatus] = useState(""); // State to hold the new status
 
   useEffect(() => {}, [!editLoading]);
-    console.log(users);
+  console.log(users);
   // Define the columns for the slots table
   const columns = useMemo<ColumnDef<TUser>[]>(
     () => [
@@ -59,21 +59,38 @@ const ManageUsers: React.FC = () => {
         accessorKey: "followers",
         header: "Followers",
         cell: ({ row }) => (
-          <div className="text-center">{row.original.followers.map((user) => user?.name).join(", ") || "N/A"}</div>
+          <div className="text-center">
+            {row.original.followers.map((user) => (user as any)?.name).join(", ") ||
+              "N/A"}
+          </div>
         ),
       },
       {
         accessorKey: "following",
         header: "Following",
         cell: ({ row }) => (
-          <div className="text-center">{row?.original?.following?.map((user) => user?.name).join(", ") || "N/A"}</div>
+          <div className="text-center">
+            {row?.original?.following?.map((user) => (user as any)?.name).join(", ") ||
+              "N/A"}
+          </div>
         ),
       },
       {
         accessorKey: "isVerified",
         header: "Verified Status",
         cell: ({ row }) => (
-          <div className="text-center">{row?.original?.isVerified?<p className="flex justify-center items-center gap-1">Verified<Verified size={19}/></p>:<p className="flex justify-center items-center gap-1">Not Verified</p>}</div>
+          <div className="text-center">
+            {row?.original?.isVerified ? (
+              <p className="flex justify-center items-center gap-1">
+                Verified
+                <Verified size={19} />
+              </p>
+            ) : (
+              <p className="flex justify-center items-center gap-1">
+                Not Verified
+              </p>
+            )}
+          </div>
         ),
       },
       {
@@ -110,10 +127,10 @@ const ManageUsers: React.FC = () => {
     e.preventDefault();
     setEditLoading(true);
     try {
-      const response = await axios.post(`/auth/update-user/${selectedSlotId}`, {
-        role: editStatus, // Send the updated status
-      });
-      toast.success(response?.data?.message);
+      // const response = await axios.post(`/auth/update-user/${selectedSlotId}`, {
+      //   role: editStatus, // Send the updated status
+      // });
+      // toast.success(response?.data?.message);
       setEditModalOpen(false);
     } catch (error: any) {
       console.log(error.response?.data);
@@ -126,8 +143,8 @@ const ManageUsers: React.FC = () => {
   const handleEditStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setEditStatus(e.target.value);
   };
-  if(isLoading){
-    return <TableSkeleton/>
+  if (isLoading) {
+    return <TableSkeleton />;
   }
   return (
     <div className="p-4">

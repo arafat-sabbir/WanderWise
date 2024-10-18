@@ -41,7 +41,7 @@ const Profile = ({
     searchTerm: "",
   });
   const isVerificationEligible = data?.data?.some(
-    (item) => item?.upvotes.length > 0
+    (item: any) => item?.upvotes.length > 0
   );
   console.log(isVerificationEligible);
 
@@ -98,7 +98,7 @@ const Profile = ({
     try {
       const response = await updateUser({ token, userData });
       if (response?.error) {
-        return toast.error(response?.error?.data.data?.message);
+        return toast.error((response?.error as any)?.data.data?.message);
       }
       refetch();
       toast.success(response?.data?.message);
@@ -119,17 +119,22 @@ const Profile = ({
     try {
       const response = await makePayment(token);
       if (response?.error) {
-        return toast.error(response?.error?.data?.message);
+        return toast.error((response?.error as any)?.data?.message);
       }
       toast.success("Please Continue Your Payment");
       refetch();
+  
       if (response?.data?.data?.payment_url) {
-        window.location.href = response?.data?.data?.payment_url;
+        // Ensure this code only runs in the browser (client-side)
+        // if (typeof window !== "undefined") {
+        //   window.location.href = response?.data?.data?.payment_url;
+        // }
       }
     } catch (error) {
       console.log(error);
     }
   };
+  
   return (
     <section className="max-w-2xl mx-auto px-14 py-6 bg-white shadow-2xl mt-16 rounded-lg">
       {/* Profile Image */}
@@ -162,7 +167,7 @@ const Profile = ({
 
       <h1 className="text-2xl flex justify-center items-center gap-1  font-bold text-center mb-6">
         {user?.name}
-        {user?.isVerified && <Verified color="blue"/>}
+        {user?.isVerified && <Verified color="blue" />}
       </h1>
 
       {/* Followers and Following Count */}
@@ -237,7 +242,9 @@ const Profile = ({
           <label className="font-semibold text-gray-600">User Since</label>
           <Input
             type="text"
-            defaultValue={new Date(user?.createdAt).toLocaleDateString()}
+            defaultValue={new Date(
+              (user as any)?.createdAt
+            ).toLocaleDateString()}
             disabled
             className="p-3 border border-gray-300 rounded-lg bg-gray-100 focus:outline-none"
           />

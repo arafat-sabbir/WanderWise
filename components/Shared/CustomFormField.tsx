@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import PhoneInput from "react-phone-number-input";
 
 import {
@@ -18,7 +17,12 @@ import Image from "next/image";
 import { Input } from "../ui/input";
 import { FormFieldType } from "@/types/types";
 import { Textarea } from "../ui/textarea";
-import { Select, SelectContent, SelectTrigger, SelectValue } from "../ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 interface CustomProps {
   control: Control<any>;
   fieldType: FormFieldType;

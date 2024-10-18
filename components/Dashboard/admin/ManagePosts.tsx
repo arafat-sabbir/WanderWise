@@ -25,6 +25,8 @@ const ManagePosts = () => {
     page,
     limit,
     searchTerm,
+    sort: "",
+    category: "all",
   });
   const [posts, setPosts] = useState<TPost[]>([]);
   const [deletePost] = useDeletePostMutation();
@@ -44,7 +46,9 @@ const ManagePosts = () => {
       {
         accessorKey: "category",
         header: "Category",
-        cell: ({ getValue }) => <span className="capitalize">{getValue() as string}</span>,
+        cell: ({ getValue }) => (
+          <span className="capitalize">{getValue() as string}</span>
+        ),
       },
       {
         accessorKey: "upvotes.length",
@@ -99,8 +103,8 @@ const ManagePosts = () => {
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
-  if(isLoading){
-    return <TableSkeleton/>
+  if (isLoading) {
+    return <TableSkeleton />;
   }
   return (
     <div className=" min-h-screen py-10">
