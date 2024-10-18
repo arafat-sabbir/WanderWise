@@ -1,10 +1,6 @@
 "use client";
-import ManagePayment from "@/components/Dashboard/admin/ManagePayment";
-import ManagePosts from "@/components/Dashboard/admin/ManagePosts";
-import ManageUsers from "@/components/Dashboard/admin/ManageUser";
-import FollowersFollowing from "@/components/Dashboard/user/followersfollowing/FollowersFollowing";
-import Posts from "@/components/Dashboard/user/post/Post";
-import Profile from "@/components/Dashboard/user/profile/Profile";
+
+import dynamic from "next/dynamic";
 import Container from "@/components/Shared/Container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -13,10 +9,19 @@ import {
 import { useAppSelector } from "@/redux/features/hooks";
 import { useGetUserQuery } from "@/redux/features/user/userApi";
 
+// Dynamically import components to avoid SSR-related issues
+const ManagePayment = dynamic(() => import("@/components/Dashboard/admin/ManagePayment"), { ssr: false });
+const ManagePosts = dynamic(() => import("@/components/Dashboard/admin/ManagePosts"), { ssr: false });
+const ManageUsers = dynamic(() => import("@/components/Dashboard/admin/ManageUser"), { ssr: false });
+const FollowersFollowing = dynamic(() => import("@/components/Dashboard/user/followersfollowing/FollowersFollowing"), { ssr: false });
+const Posts = dynamic(() => import("@/components/Dashboard/user/post/Post"), { ssr: false });
+const Profile = dynamic(() => import("@/components/Dashboard/user/profile/Profile"), { ssr: false });
+
 const Page = () => {
   const token = useAppSelector(selectCurrentToken);
   const { data, refetch, isLoading } = useGetUserQuery(token);
   const user = data?.data;
+
   return (
     <Container className="py-10 px-6 lg:px-8">
       <h1 className="text-2xl lg:text-3xl font-bold text-center mb-8">
