@@ -124,7 +124,7 @@ const CreateNewPost = () => {
       <DialogTrigger>
         <Button>Create New Post</Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[200vh]">
         <DialogHeader>
           <DialogTitle>Create a New Post</DialogTitle>
           <DialogDescription>
@@ -153,11 +153,26 @@ const CreateNewPost = () => {
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="adventure">Adventure</SelectItem>
-                    <SelectItem value="business-travel">
-                      Business Travel
+                    <SelectItem value="Adventure Travel">
+                      Adventure Travel
                     </SelectItem>
-                    <SelectItem value="exploration">Exploration</SelectItem>
+                    <SelectItem value="Cultural Experiences">
+                      Cultural Experiences
+                    </SelectItem>
+                    <SelectItem value="Family Travel">Family Travel</SelectItem>
+                    <SelectItem value="Budget Travel">Budget Travel</SelectItem>
+                    <SelectItem value="Luxury Travel">Luxury Travel</SelectItem>
+                    <SelectItem value="Solo Travel">Solo Travel</SelectItem>
+                    <SelectItem value="Food and Culinary Tours">
+                      Food and Culinary Tours
+                    </SelectItem>
+                    <SelectItem value="Eco-Tourism">Eco-Tourism</SelectItem>
+                    <SelectItem value="Wellness and Retreats">
+                      Wellness and Retreats
+                    </SelectItem>
+                    <SelectItem value="Destination Guides">
+                      Destination Guides
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               )}

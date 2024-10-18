@@ -25,8 +25,8 @@ type FeedCardProps = {
 };
 
 const FeedCard = ({ post }: FeedCardProps) => {
-  const token = useAppSelector(selectCurrentToken)
-  const { data} = useGetUserQuery(token);
+  const token = useAppSelector(selectCurrentToken);
+  const { data } = useGetUserQuery(token);
   const user = data?.data;
   const [showComments, setShowComments] = useState<string | null>(null);
   const toggleComments = (postId: string) => {
@@ -38,7 +38,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
     if (user?.isVerified) {
       router.push(redirect);
     } else {
-      router.push("/dashboard")
+      router.push("/dashboard");
       toast.error("Please Verify Your Account To View Premium Content");
     }
   };
@@ -69,9 +69,6 @@ const FeedCard = ({ post }: FeedCardProps) => {
                 {post?.user?.name}
                 {post?.user?.isVerified && <Verified color="blue" />}
               </h1>
-              <p className="text-sm text-gray-500 capitalize">
-                {post?.category ?? "Uncategorized"}
-              </p>
             </div>
           </div>
         </CardHeader>
@@ -92,9 +89,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
           <div
             className="text-gray-700 mb-4"
             dangerouslySetInnerHTML={{
-              __html:
-                (post?.content ?? "No content available.").slice(0, 200) +
-                "...",
+              __html: post?.content ?? "No content available.",
             }}
           />
           {/* Display images if available */}
@@ -113,19 +108,24 @@ const FeedCard = ({ post }: FeedCardProps) => {
             </div>
           )}
 
-          {/* Post Tags */}
-          {post?.tags && post.tags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mt-4">
-              {post.tags.map((tag, index) => (
-                <span
-                  key={index}
-                  className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
-                >
-                  <Tag className="mr-1" size={14} /> {tag}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex justify-between items-center">
+            {/* Post Tags */}
+            {post?.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {post.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
+                  >
+                    <Tag className="mr-1" size={14} /> {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center">
+              <span className=" text-gray-500 ">Category</span> : {post?.category ?? "Uncategorized"}
+            </p>
+          </div>
         </CardContent>
 
         {/* Post Actions */}
@@ -161,7 +161,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
             </p>
             <Button
               variant="outline"
-              onClick={()=>viewDetail(`/post/${post?._id}`)}
+              onClick={() => viewDetail(`/post/${post?._id}`)}
             >
               View Detail
             </Button>

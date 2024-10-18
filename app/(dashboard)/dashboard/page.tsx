@@ -76,17 +76,17 @@ const Page = () => {
 
         {/* Admin Dashboard Content */}
         <TabsContent value="ManageUser">
-          <div className=" bg-white shadow-xl rounded-lg">
+          <div className=" bg-white shadow-xl px-6 rounded-lg">
             <ManageUsers />
           </div>
         </TabsContent>
         <TabsContent value="ManagePosts">
-          <div className=" bg-white shadow-xl rounded-lg">
+          <div className=" bg-white shadow-xl  px-6 rounded-lg">
             <ManagePosts />
           </div>
         </TabsContent>
         <TabsContent value="ManagePayment">
-          <div className=" bg-white shadow-xl rounded-lg">
+          <div className=" bg-white shadow-xl  px-6 rounded-lg">
             <ManagePayment />
           </div>
         </TabsContent>

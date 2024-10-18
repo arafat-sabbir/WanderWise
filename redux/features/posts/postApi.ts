@@ -20,13 +20,17 @@ const postApi = baseApi.injectEndpoints({
         page = 1,
         limit = 5,
         searchTerm,
+        category,
+        sort,
       }: {
         page: number;
         limit: number;
         searchTerm?: string;
+        category: string;
+        sort: string;
       }) => {
         return {
-          url: `/posts?page=${page}&limit=${limit}&searchTerm=${searchTerm}`,
+          url: `/posts?page=${page}&limit=${limit}&searchTerm=${searchTerm}&category=${category}&sort=${sort}`,
           method: "GET",
         };
       },
@@ -38,7 +42,7 @@ const postApi = baseApi.injectEndpoints({
         limit = 5,
         searchTerm,
       }: {
-        token: string|null;
+        token: string | null;
         page: number;
         limit: number;
         searchTerm?: string;
@@ -75,7 +79,7 @@ const postApi = baseApi.injectEndpoints({
         url: `/posts/${postId}`,
         method: "DELETE",
       }),
-    })
+    }),
   }),
 });
 
@@ -85,5 +89,5 @@ export const {
   useGetAllPostsQuery,
   useGetSinglePostQuery,
   useGetAllPostsForUserQuery,
-  useDeletePostMutation
+  useDeletePostMutation,
 } = postApi;

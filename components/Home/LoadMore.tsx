@@ -6,7 +6,15 @@ import FeedCard from "./FeedCard";
 import { TPost } from "@/types/types";
 import { useGetAllPostsQuery } from "@/redux/features/posts/postApi";
 
-const LoadMore = ({ searchTerm }: { searchTerm: string }) => {
+const LoadMore = ({
+  searchTerm,
+  category,
+  sort,
+}: {
+  searchTerm: string;
+  category: string;
+  sort:string;
+}) => {
   const { ref, inView } = useInView();
   const [page, setPage] = useState(2); // Start from page 2, assuming page 1 data is already loaded
   const [posts, setPosts] = useState<TPost[]>([]);
@@ -17,6 +25,8 @@ const LoadMore = ({ searchTerm }: { searchTerm: string }) => {
     page,
     limit: 5,
     searchTerm,
+    category,
+    sort
   });
 
   // Handle infinite scroll when posts come into view
@@ -37,7 +47,7 @@ const LoadMore = ({ searchTerm }: { searchTerm: string }) => {
     setPage(2); // Reset page
     setHideLoading(false); // Re-enable loading indicator
   }, [searchTerm]);
-console.log(posts);
+  console.log(posts);
   return (
     <div className="mt-6">
       <div className="space-y-6">
