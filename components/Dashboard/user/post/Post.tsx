@@ -1,29 +1,115 @@
-"use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { TPost } from "@/types/types";
 import {
+  useDeletePostMutation,
   useGetAllPostsForUserQuery,
 } from "@/redux/features/posts/postApi";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+} from "@tanstack/react-table";
 import Container from "@/components/Shared/Container";
 import CreateNewPost from "@/components/Post/CreateNewPost";
-import FeedCardSkeleton from "@/components/Skeleton/FeedCardSkeleton";
-import FeedCard from "@/components/Home/FeedCard";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import TableSkeleton from "@/components/Skeleton/TableSkeleton";
 import { useAppSelector } from "@/redux/features/hooks";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import { Loader } from "lucide-react";
 
-const Posts = () => {
+const Post = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const token = useAppSelector(selectCurrentToken);
   const [page, setPage] = useState(1);
   const limit = !searchTerm ? 100 : 100;
-
-  // Fetch data using the Redux query
-  const { data, isLoading, refetch } = useGetAllPostsForUserQuery({token,page,limit,searchTerm});
+  const token = useAppSelector(selectCurrentToken);
+  const { data, isLoading, refetch } = useGetAllPostsForUserQuery({
+    token,
+    page,
+    limit,
+    searchTerm,
+  });
   const [posts, setPosts] = useState<TPost[]>([]);
+  const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation();
+
   useEffect(() => {
     setPosts(data?.data || []);
   }, [data?.data]);
 
+  // Define the table columns
+  const columns = useMemo<ColumnDef<TPost>[]>(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Title",
+        cell: ({ getValue }) => <span>{getValue() as string}</span>,
+      },
+      {
+        accessorKey: "category",
+        header: "Category",
+        cell: ({ getValue }) => (
+          <span className="capitalize">{getValue() as string}</span>
+        ),
+      },
+      {
+        accessorKey: "upvotes.length",
+        header: "Upvotes",
+        cell: ({ row }) => <span>{row.original.upvotes.length}</span>,
+      },
+      {
+        accessorKey: "upvotes.length",
+        header: "Downvotes",
+        cell: ({ row }) => <span>{row.original.downvotes.length}</span>,
+      },
+      {
+        accessorKey: "user.name",
+        header: "Author",
+        cell: ({ row }) => <span>{row.original.user.name}</span>,
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Created At",
+        cell: ({ row }) =>
+          new Date(row.original.createdAt).toLocaleDateString(),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <Button
+            disabled={isDeleting}
+            variant="destructive"
+            onClick={() => handleDeletePost(row.original._id)}
+          >
+            Delete{isDeleting && <Loader className="ml-2 animate-spin" />}
+          </Button>
+        ),
+      },
+    ],
+    []
+  );
+
+  const handleDeletePost = async (postId: string) => {
+    try {
+      const response = await deletePost({ token, postId });
+      console.log(response);
+      toast.success("Post deleted successfully!");
+      refetch(); // Refetch the posts after deletion
+    } catch (error) {
+      toast.error("Failed to delete post");
+    }
+  };
+
+  // Define the table instance
+  const table = useReactTable({
+    data: posts,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+  if (isLoading) {
+    return <TableSkeleton />;
+  }
   return (
     <div className=" min-h-screen py-10">
       <Container className="mx-auto">
@@ -42,33 +128,54 @@ const Posts = () => {
           <CreateNewPost />
         </div>
 
-        {/* Loading Skeletons */}
-        {isLoading && (
-          <>
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="py-2">
-                <FeedCardSkeleton />
-              </div>
-            ))}
-          </>
-        )}
-
-        {/* News Feed */}
-        {posts.length > 0 && !isLoading && (
-          <div className="space-y-6">
-            {posts.map((post: TPost) => (
-              <FeedCard
-                refetch={refetch}
-                key={post._id.toString()}
-                post={post}
-                setPosts={setPosts}
-              />
-            ))}
-          </div>
-        )}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg sm:text-xl lg:text-2xl font-bold">
+            Manage Posts
+          </h2>
+        </div>
+        <div className="w-full overflow-x-auto">
+          <table className="table-auto w-full border-2 border-gray-300/50-collapse">
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="border border-gray-300 px-4 py-2 text-center"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id} className="border-b hover:bg-gray-100">
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      className="border border-gray-300 px-4 py-2 text-center"
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Container>
     </div>
   );
 };
 
-export default Posts;
+export default Post;
