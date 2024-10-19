@@ -3,25 +3,48 @@
 import dynamic from "next/dynamic";
 import Container from "@/components/Shared/Container";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  selectCurrentToken,
-} from "@/redux/features/auth/authSlice";
+import { selectCurrentToken } from "@/redux/features/auth/authSlice";
 import { useAppSelector } from "@/redux/features/hooks";
 import { useGetUserQuery } from "@/redux/features/user/userApi";
+import { Loader } from "lucide-react";
 
 // Dynamically import components to avoid SSR-related issues
-const ManagePayment = dynamic(() => import("@/components/Dashboard/admin/ManagePayment"), { ssr: false });
-const ManagePosts = dynamic(() => import("@/components/Dashboard/admin/ManagePosts"), { ssr: false });
-const ManageUsers = dynamic(() => import("@/components/Dashboard/admin/ManageUser"), { ssr: false });
-const FollowersFollowing = dynamic(() => import("@/components/Dashboard/user/followersfollowing/FollowersFollowing"), { ssr: false });
-const Posts = dynamic(() => import("@/components/Dashboard/user/post/Post"), { ssr: false });
-const Profile = dynamic(() => import("@/components/Dashboard/user/profile/Profile"), { ssr: false });
+const ManagePayment = dynamic(
+  () => import("@/components/Dashboard/admin/ManagePayment"),
+  { ssr: false }
+);
+const ManagePosts = dynamic(
+  () => import("@/components/Dashboard/admin/ManagePosts"),
+  { ssr: false }
+);
+const ManageUsers = dynamic(
+  () => import("@/components/Dashboard/admin/ManageUser"),
+  { ssr: false }
+);
+const FollowersFollowing = dynamic(
+  () =>
+    import("@/components/Dashboard/user/followersfollowing/FollowersFollowing"),
+  { ssr: false }
+);
+const Posts = dynamic(() => import("@/components/Dashboard/user/post/Post"), {
+  ssr: false,
+});
+const Profile = dynamic(
+  () => import("@/components/Dashboard/user/profile/Profile"),
+  { ssr: false }
+);
 
 const Page = () => {
   const token = useAppSelector(selectCurrentToken);
   const { data, refetch, isLoading } = useGetUserQuery(token);
   const user = data?.data;
-
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[80vh]">
+        <Loader className="animate-spin " />
+      </div>
+    );
+  }
   return (
     <Container className="py-10 px-6 lg:px-8">
       <h1 className="text-2xl lg:text-3xl font-bold text-center mb-8">

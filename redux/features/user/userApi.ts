@@ -13,7 +13,16 @@ const userApi = baseApi.injectEndpoints({
         },
       }),
     }),
-
+    updateRole: builder.mutation({
+      query: ({ token, role, id }) => ({
+        url: `/users/update-role/${id}`,
+        method: "PUT",
+        body: { role },
+        headers: {
+          Authorization: `Bearer ${token}`, // Ensure this header is sent
+        },
+      }),
+    }),
     getUser: builder.query({
       query: (token) => ({
         url: `/users/me`,
@@ -51,4 +60,5 @@ export const {
   useGetUserQuery,
   useFollowOrUnFollowUserMutation,
   useGetAllUserQuery,
+  useUpdateRoleMutation,
 } = userApi;
