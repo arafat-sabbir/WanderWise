@@ -83,7 +83,6 @@ const CreateNewPost = () => {
       const response = await createNewPost({ token, postData: formData });
       if (response?.error) {
         toast.error((response?.error as any)?.data?.message);
-        console.log((response?.error as any)?.data);
       } else {
         toast.success(response?.data?.message);
         setModelOpen(false);

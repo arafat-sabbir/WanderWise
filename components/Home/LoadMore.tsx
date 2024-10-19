@@ -47,7 +47,6 @@ const LoadMore = ({
     setPage(2); // Reset page
     setHideLoading(false); // Re-enable loading indicator
   }, [searchTerm]);
-  console.log(posts);
   return (
     <div className="mt-6">
       <div className="space-y-6">

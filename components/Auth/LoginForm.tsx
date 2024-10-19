@@ -37,7 +37,6 @@ const LoginForm = ({ className }: { className?: string }) => {
     try {
       const response = await loginUser(values);
       toast.success(response?.data?.message);
-      console.log(response, "login");
       const user = response.data?.data as TUser;
       setCookie("token", response?.data.data.token, {
         maxAge: 60 * 60 * 24 * 10,
@@ -47,7 +46,6 @@ const LoginForm = ({ className }: { className?: string }) => {
       router.push("/");
     } catch (error: any) {
       //   toast.error(error.response.data.message);
-      console.log(error);
     }
   };
 

@@ -30,7 +30,6 @@ const Contact: React.FC = () => {
 
   // Form submission handler
   const onSubmit: SubmitHandler<TContact> = (data) => {
-    console.log(data);
     setLoading(true);
     const tId = toast.loading("Sending message...");
     setTimeout(() => {

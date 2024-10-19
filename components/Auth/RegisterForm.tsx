@@ -54,11 +54,9 @@ const RegisterForm = ({ className }: { className?: string }) => {
       formData.append(key, value as string); // Type casting value to string
     });
 
-    console.log({ profilePicture: photo, ...values });
 
     try {
       const response = await registerUser(formData); // Send `formData` instead of object
-      console.log(response?.data?.data);
       toast.success("Register Successful");
       router.push("/auth/sign-in");
     } catch (error: any) {

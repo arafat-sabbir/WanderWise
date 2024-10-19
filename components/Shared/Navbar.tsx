@@ -21,7 +21,6 @@ const Navbar = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
   const pathName = usePathname()
-  console.log(pathName);
   const dispatch = useAppDispatch();
 
   return (

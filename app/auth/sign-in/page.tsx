@@ -5,7 +5,6 @@ import { useAppSelector } from "@/redux/features/hooks";
 
 const Page = () => {
   const user = useAppSelector(selectCurrentUser);
-  console.log(user);
   return <LoginForm />;
 };
 

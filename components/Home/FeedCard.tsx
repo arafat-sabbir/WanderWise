@@ -34,7 +34,6 @@ const FeedCard = ({ post }: FeedCardProps) => {
   };
   const router = useRouter();
   const viewDetail = (redirect: string) => {
-    console.log(user?.isVerified);
     if (user?.isVerified) {
       router.push(redirect);
     } else {

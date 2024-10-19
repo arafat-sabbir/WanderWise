@@ -93,7 +93,6 @@ const Post = () => {
   const handleDeletePost = async (postId: string) => {
     try {
       const response = await deletePost({ token, postId });
-      console.log(response);
       toast.success("Post deleted successfully!");
       refetch(); // Refetch the posts after deletion
     } catch (error) {

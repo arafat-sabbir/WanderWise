@@ -43,7 +43,7 @@ const Profile = ({
   const isVerificationEligible = data?.data?.some(
     (item: any) => item?.upvotes.length > 0
   );
-  console.log(isVerificationEligible);
+
 
   const [makePayment, { isLoading: paymentLoading }] =
     useCreateNewPaymentMutation();
@@ -104,7 +104,7 @@ const Profile = ({
       toast.success(response?.data?.message);
       setIsEditing(false);
     } catch (error) {
-      console.log("Update Error:", error);
+
     }
   };
   if (isLoading) {

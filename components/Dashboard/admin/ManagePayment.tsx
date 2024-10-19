@@ -15,7 +15,6 @@ import TableSkeleton from "@/components/Skeleton/TableSkeleton";
 const ManagePayment = () => {
   const token = useAppSelector(selectCurrentToken);
   const { data, isLoading, error } = useGetAllPaymentQuery(token!);
-  console.log(data, error);
   // Define the table columns
   const columns = useMemo<ColumnDef<TPost>[]>(
     () => [

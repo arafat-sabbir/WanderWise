@@ -126,7 +126,6 @@ const ManageUsers: React.FC = () => {
   });
 
   const handleEditSubmit = async (e: React.FormEvent) => {
-    console.log({ token, role: editStatus, id: userId });
     e.preventDefault();
     try {
       const response = await updateUser({
@@ -138,7 +137,6 @@ const ManageUsers: React.FC = () => {
       toast.success(response?.data?.message);
       setEditModalOpen(false);
     } catch (error: any) {
-      console.log(error.response?.data);
       toast.error(error?.response?.data?.message);
     }
   };

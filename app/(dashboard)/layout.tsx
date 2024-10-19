@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter()
-    console.log("dashboard layout");
+
     const token = useAppSelector(selectCurrentToken)
     if(!token){
         router.push('/auth/sign-in')
