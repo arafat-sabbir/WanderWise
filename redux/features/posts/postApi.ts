@@ -75,9 +75,12 @@ const postApi = baseApi.injectEndpoints({
       }),
     }),
     deletePost: builder.mutation({
-      query: (postId) => ({
+      query: ({ token, postId }) => ({
         url: `/posts/${postId}`,
         method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }),
     }),
   }),

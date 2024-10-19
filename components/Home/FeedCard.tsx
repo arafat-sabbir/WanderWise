@@ -53,19 +53,19 @@ const FeedCard = ({ post }: FeedCardProps) => {
       animate="visible"
       variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
     >
-      <Card className="shadow-md">
+      <Card className="shadow-md w-full max-w-4xl mx-auto my-4">
         {/* Post Header */}
-        <CardHeader className="flex justify-between items-center border-b border-gray-200">
+        <CardHeader className="flex justify-between items-center border-b border-gray-200 p-4 md:p-6">
           <div className="flex items-center space-x-2">
-            <Avatar className="bg-gray-200">
+            <Avatar className="bg-gray-200 w-12 h-12 md:w-16 md:h-16">
               {post?.user?.profilePicture ? (
                 <AvatarImage src={post.user.profilePicture} />
               ) : (
-                <LucideUser className="text-gray-600" />
+                <LucideUser className="text-gray-600 w-8 h-8 md:w-10 md:h-10" />
               )}
             </Avatar>
             <div>
-              <h1 className="text-2xl flex justify-center items-center gap-1  font-bold text-center ">
+              <h1 className="text-lg md:text-2xl flex items-center gap-1 font-bold">
                 {post?.user?.name}
                 {post?.user?.isVerified && <Verified color="blue" />}
               </h1>
@@ -74,27 +74,28 @@ const FeedCard = ({ post }: FeedCardProps) => {
         </CardHeader>
 
         {/* Post Content */}
-        <CardContent>
+        <CardContent className="p-4 md:p-6">
           <div className="flex justify-between items-center pt-2">
-            <h2 className="text-xl font-bold mb-2 capitalize">
+            <h2 className="text-base md:text-xl font-bold mb-2 capitalize">
               {post?.title ?? "Untitled Post"}
             </h2>
             {post?.isPremium && (
               <span className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center">
                 Premium
-                <Verified className="text-blue-500 ml-1" size={24} />
+                <Verified className="text-blue-500 ml-1" size={20} />
               </span>
             )}
           </div>
           <div
-            className="text-gray-700 mb-4"
+            className="text-sm md:text-base text-gray-700 mb-4"
             dangerouslySetInnerHTML={{
               __html: post?.content ?? "No content available.",
             }}
           />
+
           {/* Display images if available */}
           {post?.images && post.images.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4">
               {post.images.map((image, index) => (
                 <Image
                   height={400}
@@ -108,29 +109,30 @@ const FeedCard = ({ post }: FeedCardProps) => {
             </div>
           )}
 
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col md:flex-row justify-between items-center mt-4">
             {/* Post Tags */}
             {post?.tags && post.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {post.tags.map((tag, index) => (
                   <span
                     key={index}
-                    className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
+                    className="text-xs md:text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
                   >
                     <Tag className="mr-1" size={14} /> {tag}
                   </span>
                 ))}
               </div>
             )}
-            <p className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center">
-              <span className=" text-gray-500 ">Category</span> : {post?.category ?? "Uncategorized"}
+            <p className="text-xs md:text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center mt-2">
+              <span className="text-gray-500">Category</span>:{" "}
+              {post?.category ?? "Uncategorized"}
             </p>
           </div>
         </CardContent>
 
         {/* Post Actions */}
-        <CardFooter className="flex justify-between items-center border-t border-gray-200 ">
-          <div className="flex space-x-4 pt-2">
+        <CardFooter className="flex flex-col md:flex-row justify-between items-center border-t border-gray-200 p-4 md:p-6">
+          <div className="flex space-x-4">
             <div className="flex items-center">
               <ThumbsUp
                 className="mr-1"
@@ -152,7 +154,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
               {post?.downvotes?.length ?? 0}
             </div>
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center mt-4 md:mt-0">
             <p
               className="text-gray-500 hover:underline hover:cursor-pointer mr-2"
               onClick={() => toggleComments(post?._id ?? "")}

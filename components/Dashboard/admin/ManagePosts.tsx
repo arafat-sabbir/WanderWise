@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import { TPost } from "@/types/types";
 import {
   useGetAllPostsQuery,
@@ -15,6 +15,9 @@ import CreateNewPost from "@/components/Post/CreateNewPost";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import TableSkeleton from "@/components/Skeleton/TableSkeleton";
+import { useAppSelector } from "@/redux/features/hooks";
+import { selectCurrentToken } from "@/redux/features/auth/authSlice";
+import { Loader } from "lucide-react";
 
 const ManagePosts = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -29,7 +32,7 @@ const ManagePosts = () => {
     category: "all",
   });
   const [posts, setPosts] = useState<TPost[]>([]);
-  const [deletePost] = useDeletePostMutation();
+  const [deletePost,{isLoading: isDeleting}] = useDeletePostMutation();
 
   useEffect(() => {
     setPosts(data?.data || []);
@@ -76,20 +79,22 @@ const ManagePosts = () => {
         header: "Actions",
         cell: ({ row }) => (
           <Button
+          disabled={isDeleting}
             variant="destructive"
             onClick={() => handleDeletePost(row.original._id)}
           >
-            Delete
+            Delete{isDeleting&&<Loader className="ml-2 animate-spin"/>}
           </Button>
         ),
       },
     ],
     []
   );
-
+const token = useAppSelector(selectCurrentToken)
   const handleDeletePost = async (postId: string) => {
     try {
-      await deletePost(postId).unwrap();
+      const response =await deletePost({token,postId})
+      console.log(response);
       toast.success("Post deleted successfully!");
       refetch(); // Refetch the posts after deletion
     } catch (error) {
