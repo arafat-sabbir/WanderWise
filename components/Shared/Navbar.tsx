@@ -67,8 +67,6 @@ const Navbar = () => {
                   <DropdownMenuItem>
                     <Link href="/dashboard">Manage Dashboard</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem><Link href={"/dashboard/profile"}>Profile</Link></DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
                   <DropdownMenuItem
                     onClick={() => {
                       dispatch(logOut());
