@@ -33,12 +33,17 @@ const FeedCard = ({ post }: FeedCardProps) => {
     setShowComments(showComments === postId ? null : postId);
   };
   const router = useRouter();
-  const viewDetail = (redirect: string) => {
-    if (user?.isVerified) {
-      router.push(redirect);
-    } else {
+  const viewDetail = (redirect: string, isPremium: boolean) => {
+    console.log(isPremium);
+    if (!token && isPremium) {
+      router.push("/auth/sign-in");
+      return toast.error("Please Login To View Premium Content");
+    }
+    if (!user?.isVerified && isPremium) {
       router.push("/dashboard");
       toast.error("Please Verify Your Account To View Premium Content");
+    } else {
+      router.push(redirect);
     }
   };
   return (
@@ -162,7 +167,7 @@ const FeedCard = ({ post }: FeedCardProps) => {
             </p>
             <Button
               variant="outline"
-              onClick={() => viewDetail(`/post/${post?._id}`)}
+              onClick={() => viewDetail(`/post/${post?._id}`, post?.isPremium)}
             >
               View Detail
             </Button>

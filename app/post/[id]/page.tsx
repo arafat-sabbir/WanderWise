@@ -4,8 +4,18 @@ import PostDetailSkeleton from "@/components/Skeleton/PostDetailSkeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { selectCurrentToken } from "@/redux/features/auth/authSlice";
-import { useCreateNewCommentMutation } from "@/redux/features/comments/commentApi";
+import {
+  useCreateNewCommentMutation,
+  useDeleteCommentMutation,
+  useUpdateCommentMutation,
+} from "@/redux/features/comments/commentApi";
 import { useAppSelector } from "@/redux/features/hooks";
 import {
   useGetSinglePostQuery,
@@ -15,19 +25,48 @@ import {
   useFollowOrUnFollowUserMutation,
   useGetUserQuery,
 } from "@/redux/features/user/userApi";
-import { Loader, Tag, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  CircleX,
+  Ellipsis,
+  Loader,
+  Pencil,
+  PenLine,
+  Tag,
+  ThumbsDown,
+  ThumbsUp,
+  X,
+} from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
 const PostDetail = ({ params }: { params: { id: string } }) => {
+  const [editingCommentId, setEditingCommentId] = useState<string | null>(null);
+
+  // ... other code
+  const [showPopOver, setShowPopOver] = useState(false);
+  const handleEditComment = (commentId: string) => {
+    if (editingCommentId === commentId) {
+      // If the user clicks the edit button again, toggle off the editing state
+      setEditingCommentId(null);
+    } else {
+      // Set the editing state to the selected comment ID
+      setEditingCommentId(commentId);
+    }
+  };
   const token = useAppSelector(selectCurrentToken);
   const { data } = useGetUserQuery(token);
   const user = data?.data;
   const [comment, setComment] = useState<string>("");
   const [votePost] = useVotePostMutation();
   const [addComment, { isLoading }] = useCreateNewCommentMutation();
-  const { data: post,isLoading:isPostLoading ,error, refetch } = useGetSinglePostQuery(params.id);
+  const {
+    data: post,
+    isLoading: isPostLoading,
+    error,
+    refetch,
+  } = useGetSinglePostQuery(params.id);
+
   const handleCommentSubmit = async () => {
     if (comment.trim()) {
       try {
@@ -39,7 +78,7 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
         toast.success(response?.message); // Assuming response has a message field
         refetch(); // Refetch to update the comments
         setComment("");
-      } catch (error:any) {
+      } catch (error: any) {
         toast.error(error?.data?.message || "Error submitting comment.");
         console.error("Comment submission error:", error);
       }
@@ -82,16 +121,51 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
       toast.error("Failed to follow/unfollow");
     }
   };
+  const [editedComment, setEditedComment] = useState("");
+  const [updateComment, { isLoading: updateIsLoading }] =
+    useUpdateCommentMutation();
+
+  const editComment = async () => {
+    try {
+      const response = await updateComment({
+        token,
+        id: editingCommentId,
+        comment: editedComment,
+      });
+      console.log(response?.data);
+      toast.success(response?.data?.message);
+      setEditingCommentId(null);
+      refetch();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const [deleteCommentById, { isLoading: deleteIsLoading }] =
+    useDeleteCommentMutation();
+  const deleteComment = async (commentId: string) => {
+    try {
+      const response = await deleteCommentById({
+        token,
+        id: commentId,
+      });
+      console.log(response?.data);
+      toast.success(response?.data?.message);
+      refetch();
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   // Handle loading and error states
   if (error)
     return <div className="text-center py-10">Error loading post!</div>;
-  if(isPostLoading) return <PostDetailSkeleton/>
+  if (isPostLoading) return <PostDetailSkeleton />;
   return (
     <Container className="mx-auto p-5 md:p-10">
       {post?.data?.tags && post?.data?.tags.length > 0 && (
         <div className="flex flex-wrap gap-2 my-4">
-          {post?.data.tags.map((tag: string, index:number) => (
+          {post?.data.tags.map((tag: string, index: number) => (
             <span
               key={index}
               className="text-sm text-blue-600 capitalize bg-blue-100 px-2 py-1 rounded-full flex items-center"
@@ -211,22 +285,81 @@ const PostDetail = ({ params }: { params: { id: string } }) => {
         {post?.data.comments.length === 0 ? (
           <p className="text-gray-500">No comments yet.</p>
         ) : (
-          post?.data.comments.map((comment:any) => (
+          post?.data.comments.map((comment: any) => (
             <div
               key={comment?._id}
-              className="flex items-start mb-2 p-2 bg-gray-100 rounded-lg shadow-sm"
+              className="flex justify-between items-center mb-2 p-2 bg-gray-100 rounded-lg shadow-sm"
             >
-              <Avatar>
-                <AvatarImage src={comment?.user?.profilePicture} />
-                <AvatarFallback>{comment?.user?.name?.[0]}</AvatarFallback>
-              </Avatar>
+              <div className="flex items-start">
+                <Avatar>
+                  <AvatarImage src={comment?.user?.profilePicture} />
+                  <AvatarFallback>{comment?.user?.name?.[0]}</AvatarFallback>
+                </Avatar>
 
-              <div className="ml-2">
-                <p className="font-bold">
-                  {comment?.user?.name ?? "Anonymous"}
-                </p>
-                <p>{comment?.comment ?? "No comment available"}</p>
+                <div className="ml-2">
+                  <p className="font-bold">
+                    {comment?.user?.name ?? "Anonymous"}
+                  </p>
+                  <div className="flex gap-2 items-center">
+                    <Input
+                      onChange={(e) => setEditedComment(e.target.value)}
+                      disabled={editingCommentId !== comment?._id}
+                      className="disabled:border-0 disabled:text-black disabled:opacity-100 disabled:shadow-none disabled:p-0 disabled:m-0 disabled:-mt-2"
+                      defaultValue={comment?.comment ?? "No comment available"}
+                    ></Input>
+                    {editingCommentId == comment?._id && (
+                      <>
+                        <Button
+                          onClick={editComment}
+                          disabled={updateIsLoading}
+                        >
+                          Update
+                          {updateIsLoading && (
+                            <Loader className="ml-2 animate-spin" />
+                          )}
+                        </Button>
+                        <Button
+                          onClick={()=>setEditingCommentId("")}
+                          disabled={updateIsLoading}
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
+              {user?._id === comment?.user?._id && (
+                <Popover open={showPopOver} onOpenChange={setShowPopOver}>
+                  <PopoverTrigger>
+                    <Ellipsis />
+                  </PopoverTrigger>
+                  <PopoverContent className="max-w-[120px] space-y-2">
+                    <p
+                      className="flex gap-1 items-center border rounded-md px-2 py-1 cursor-pointer"
+                      onClick={() => {
+                        handleEditComment(comment._id); // Enable editing for the selected comment
+                        setEditingCommentId(comment._id); // Close popover by changing the state
+                        setShowPopOver(false);
+                      }}
+                    >
+                      Edit
+                      <PenLine />
+                    </p>
+                    <p
+                      onClick={() => deleteComment(comment._id)}
+                      className="flex gap-1 items-center border rounded-md px-2 py-1 cursor-pointer"
+                    >
+                      Delete
+                      {deleteIsLoading ? (
+                        <Loader className="animate-spin" />
+                      ) : (
+                        <CircleX />
+                      )}
+                    </p>
+                  </PopoverContent>
+                </Popover>
+              )}
             </div>
           ))
         )}

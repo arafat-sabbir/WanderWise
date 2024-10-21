@@ -13,7 +13,26 @@ const commentApi = baseApi.injectEndpoints({
         },
       }),
     }),
+    updateComment: builder.mutation({
+      query: ({ token, id, comment }) => ({
+        url: `/comments/${id}`,
+        method: "PUT",
+        body: { comment },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    }),
+    deleteComment: builder.mutation({
+      query: ({ token, id }) => ({
+        url: `/comments/${id}`,
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+    })
   }),
 });
 
-export const { useCreateNewCommentMutation } = commentApi;
+export const { useCreateNewCommentMutation,useUpdateCommentMutation,useDeleteCommentMutation } = commentApi;
